@@ -9,13 +9,14 @@ import {
   Icon,
   useColorMode,
   useColorModeValue,
-  Image,
   Button,
+  Input,
+  InputGroup,
+  InputRightElement,
 } from '@chakra-ui/react';
-import React from 'react';
+import React, { useState } from 'react';
 import { FcComments, FcImageFile, FcCheckmark, FcDownload } from 'react-icons/fc';
 import { Layout } from '../components/Layout';
-import chatImage from '../images/dashboard.jpg';
 
 export default function ProtectedPage() {
   const { colorMode } = useColorMode();
@@ -23,8 +24,70 @@ export default function ProtectedPage() {
   const userBgColor = useColorModeValue('blue.100', 'blue.700');
   const botBgColor = useColorModeValue('green.100', 'green.700');
   const textColor = useColorModeValue('gray.700', 'white');
-  
-  const Feature = ({ title, text, icon }) => {
+
+  const [chatHistory, setChatHistory] = useState([
+    { role: 'bot', message: "Bot : Hi, How can I assist you?" },
+  ]);
+  const [message, setMessage] = useState('');
+
+  const addMessageToChat = (role, message) => {
+    // setChatHistory([...chatHistory, { role, message }]);
+    setChatHistory((prevHistory) => [...prevHistory, { role, message }]);
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      sendMessage();
+    }
+  };
+
+  const matchImageURL = (message) => {
+    const regex = /\[(.*?)\]\((.*?)\)/; // Regular expression to capture text and link
+    const match = message.match(regex);
+    return match;
+  }
+
+  const sendMessage = async () => {
+    if (!message.trim()) return;
+    const payload = {
+      human_msg: message
+    };
+    const url = process.env.REACT_APP_TEXT_TO_IMAGE_API_URL;
+    
+    try {
+      addMessageToChat('user', `You : ${message}`);
+      setMessage('');
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const responseData = await response.json();
+      const botResponse = responseData.ai_msg; // response message is in 'ai_msg' field
+      const match = matchImageURL(botResponse);
+
+      if (match) {
+        const imageUrl = match[2]; // Second capture group contains the URL
+        addMessageToChat('bot', `Bot: ${botResponse.slice(0, match.index)}`);
+        addMessageToChat('image', `${imageUrl}`);
+        addMessageToChat('bot', `Bot: ${botResponse.slice(match.index + match[0].length)}`);
+        // Use imageUrl to display the image
+      } else {
+        addMessageToChat('bot', `Bot: ${botResponse}`);
+      }
+
+    } catch (error) {
+      console.error('Error fetching response:', error);
+      addMessageToChat('bot', 'Bot: Sorry, I encountered an error. Please try again later.');
+    }
+
+
+  };
+
+  const Feature = ({ title, icon }) => {
     return (
       <Stack spacing={2}>
         <Flex
@@ -51,7 +114,6 @@ export default function ProtectedPage() {
           spacing={{ base: 2, md: 4 }}
           py={{ base: 2, md: 2 }}
           direction={{ base: 'column', md: 'row' }}>
-                  
           <Stack flex={1} spacing={{ base: 1, md: 4 }}>
             <Heading
               lineHeight={1.1}
@@ -84,53 +146,52 @@ export default function ProtectedPage() {
             />
           </SimpleGrid>
         </Box>
-        
-        <Stack spacing={4} mt={10} mb={20}> 
-              <Text as={'span'} color={'black.400'} fontSize={{ base: 'xl', sm: '2xl', lg: '3xl' }}>
-                Chat with our Bot
-              </Text>
+
+        <Stack spacing={4} mt={10} mb={20}>
+          <Text as={'span'} color={'black.400'} fontSize={{ base: 'xl', sm: '2xl', lg: '3xl' }}>
+            Chat with our Bot
+          </Text>
           <Box bg={bgColor} p={4} borderRadius="md">
             <Stack spacing={3}>
-              <Box bg={botBgColor} p={3} borderRadius="md" alignSelf="flex-start">
-                Bot : Hi, How can I assist you?
-              </Box>
-              <Box bg={userBgColor} p={3} borderRadius="md" alignSelf="flex-end">
-                User : Hi! Can you generate an image of a car for me?
-              </Box>
-              <Box bg={botBgColor} p={3} borderRadius="md" alignSelf="flex-start">
-                Bot: Sure! I'd be happy to help you with that. Could you please provide me with some details about the car?
-              </Box>
-              <Box bg={userBgColor} p={3} borderRadius="md" alignSelf="flex-end">
-                User: I want a black car driving on a race track.
-              </Box>
-              <Box bg={botBgColor} p={3} borderRadius="md" alignSelf="flex-start">
-                Bot: Generating your image... Please wait a moment.
-              </Box>
-              <Box bg={botBgColor} p={3} borderRadius="md" alignSelf="flex-start">
-                <Flex direction="column" alignItems="center">
-                  <Image src={chatImage} alt="Generated Image" borderRadius="md" boxSize="200px" />
-                  <Stack direction="row" spacing={4} mt={3}>
-                    <Button colorScheme="red" variant="solid">
-                      Save
-                    </Button>
-                    <Button colorScheme="blue" variant="solid">
-                      Download
-                    </Button>
-                  </Stack>
-                </Flex>
-              </Box>
-              <Box bg={botBgColor} p={3} borderRadius="md" alignSelf="flex-start">
-                Bot: Is there anything specific you would like to add or modify in the image?
-              </Box>
-
-              <Box bg={userBgColor} p={3} borderRadius="md" alignSelf="flex-end">
-                User: No, Thank You.
-              </Box>
-              
+              {chatHistory.map((chat, index) => (
+                <Box
+                  key={index}
+                  bg={chat.role === 'bot' || chat.role === 'image' ? botBgColor : userBgColor}
+                  p={3}
+                  borderRadius="md"
+                  alignSelf={chat.role === 'bot' || chat.role === 'image' ? 'flex-start' : 'flex-end'}>
+                  {/* {chat.message} */}
+                  {chat.role === 'image' ? (
+                    <div>
+                    <img src={chat.message} alt="Generated" width="200px" height="200px"/>
+                    <a href={chat.message} target="_blank" rel="noopener noreferrer"
+                    style={{ textDecoration: 'underline', color: 'aqua' }}>Open image in new tab</a>
+                    </div>
+                  ) : (
+                    <span>{chat.message}</span>
+                  )}
+                </Box>
+              ))}
             </Stack>
           </Box>
+          <InputGroup size="md">
+            <Input
+              type="text"
+              placeholder="Type your message here..."
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              onKeyPress={handleKeyPress}
+              bg={userBgColor}
+              borderRadius="md"
+              focusBorderColor="blue.500"
+            />
+            <InputRightElement width="4.5rem">
+              <Button h="1.75rem" size="sm" onClick={sendMessage}>
+                Send
+              </Button>
+            </InputRightElement>
+          </InputGroup>
         </Stack>
-        
       </Container>
     </Layout>
   );
