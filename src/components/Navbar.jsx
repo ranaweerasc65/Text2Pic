@@ -5,9 +5,14 @@ import {
   Image,
   useColorMode,
   useColorModeValue,
+  Menu,
+  MenuButton,
+  MenuItems,
+  MenuItem,
+  MenuList,
 } from '@chakra-ui/react';
 import React from 'react';
-import { FaMoon, FaSun } from 'react-icons/fa';
+import { FaMoon, FaSun, FaUser } from 'react-icons/fa';
 import Navlink from './Navlink';
 import logo from '../images/logo_navbar.png';
 import { Link as RouterLink } from 'react-router-dom';
@@ -15,8 +20,7 @@ import { useAuth } from '../contexts/AuthContext';
 
 export function Navbar() {
   const { toggleColorMode } = useColorMode();
-
-  const {currentUser, logout} = useAuth()
+  const { currentUser, logout } = useAuth();
 
   return (
     <Box
@@ -42,19 +46,32 @@ export function Navbar() {
         <HStack spacing={4}>
           {!currentUser && <Navlink to='/login' name='Login' />}
           {/*{!currentUser && <Navlink to='/register' name='Register' />}*/}
-          {currentUser && <Navlink to='/profile' name='Profile' />}
-          {currentUser && <Navlink to='/dashboard' name='Dashboard' />}
-
-          {currentUser && <Navlink
-            to='/logout'
-            name='Logout'
-            onClick={async e => {
-              e.preventDefault();
-              // handle logout
-              logout()
-              alert('You are logging out now!!!');
-            }}
-          />}
+          {currentUser && (
+            <>
+              <Navlink to='/dashboard' name='Dashboard' />
+              <Menu>
+                <MenuButton
+                  as={IconButton}
+                  aria-label='User Menu'
+                  icon={<FaUser />}
+                  variant='outline'
+                />
+                <MenuList>
+                  <MenuItem as={RouterLink} to='/profile'>Profile</MenuItem>
+                  <MenuItem
+                    onClick={async (e) => {
+                      e.preventDefault();
+                      // handle logout
+                      await logout();
+                      alert('You are logging out now!!!');
+                    }}
+                  >
+                    Logout
+                  </MenuItem>
+                </MenuList>
+              </Menu>
+            </>
+          )}
           <IconButton
             variant='outline'
             icon={useColorModeValue(<FaSun />, <FaMoon />)}
