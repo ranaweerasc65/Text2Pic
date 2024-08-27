@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import {
   Box,
   HStack,
@@ -7,12 +8,18 @@ import {
   useColorModeValue,
   Menu,
   MenuButton,
-  MenuItems,
-  MenuItem,
   MenuList,
+  MenuItem,
+  Button,
+  useDisclosure,
+  AlertDialog,
+  AlertDialogOverlay,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogBody,
+  AlertDialogFooter,
 } from '@chakra-ui/react';
-import React from 'react';
-import { FaMoon, FaSun, FaUser } from 'react-icons/fa';
+import { FaMoon, FaSun, FaUserCircle } from 'react-icons/fa';
 import Navlink from './Navlink';
 import logo from '../images/logo_navbar.png';
 import { Link as RouterLink } from 'react-router-dom';
@@ -21,6 +28,14 @@ import { useAuth } from '../contexts/AuthContext';
 export function Navbar() {
   const { toggleColorMode } = useColorMode();
   const { currentUser, logout } = useAuth();
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const cancelRef = React.useRef();
+
+  const handleLogout = async () => {
+    onClose();
+    await logout();
+    alert('You are logging out now!!!');
+  };
 
   return (
     <Box
@@ -45,33 +60,19 @@ export function Navbar() {
         {/* Navlinks and other components */}
         <HStack spacing={4}>
           {!currentUser && <Navlink to='/login' name='Login' />}
-          {/*{!currentUser && <Navlink to='/register' name='Register' />}*/}
+          
+          {currentUser && <Navlink to='/dashboard' name='Dashboard' />}
+          
           {currentUser && (
-            <>
-              <Navlink to='/dashboard' name='Dashboard' />
-              <Menu>
-                <MenuButton
-                  as={IconButton}
-                  aria-label='User Menu'
-                  icon={<FaUser />}
-                  variant='outline'
-                />
-                <MenuList>
-                  <MenuItem as={RouterLink} to='/profile'>Profile</MenuItem>
-                  <MenuItem
-                    onClick={async (e) => {
-                      e.preventDefault();
-                      // handle logout
-                      await logout();
-                      alert('You are logging out now!!!');
-                    }}
-                  >
-                    Logout
-                  </MenuItem>
-                </MenuList>
-              </Menu>
-            </>
+            <Menu>
+              <MenuButton as={IconButton} icon={<FaUserCircle />} aria-label="Profile Menu" variant="outline" />
+              <MenuList>
+                <Navlink to='/profile' name='Profile' />
+                <MenuItem onClick={onOpen}>Logout</MenuItem>
+              </MenuList>
+            </Menu>
           )}
+
           <IconButton
             variant='outline'
             icon={useColorModeValue(<FaSun />, <FaMoon />)}
@@ -80,6 +81,34 @@ export function Navbar() {
           />
         </HStack>
       </HStack>
+
+      {/* AlertDialog for logout confirmation */}
+      <AlertDialog
+        isOpen={isOpen}
+        leastDestructiveRef={cancelRef}
+        onClose={onClose}
+      >
+        <AlertDialogOverlay>
+          <AlertDialogContent>
+            <AlertDialogHeader fontSize='lg' fontWeight='bold'>
+              Confirm Logout
+            </AlertDialogHeader>
+
+            <AlertDialogBody>
+              Are you sure you want to logout? This action cannot be undone.
+            </AlertDialogBody>
+
+            <AlertDialogFooter>
+              <Button ref={cancelRef} onClick={onClose}>
+                Cancel
+              </Button>
+              <Button colorScheme='red' onClick={handleLogout} ml={3}>
+                Logout
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
+      </AlertDialog>
     </Box>
   );
 }
