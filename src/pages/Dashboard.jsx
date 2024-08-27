@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import {
   Heading,
   Container,
@@ -13,25 +14,31 @@ import {
   Input,
   InputGroup,
   InputRightElement,
+  IconButton,
 } from '@chakra-ui/react';
-import React, { useState } from 'react';
 import { FcComments, FcImageFile, FcCheckmark, FcDownload } from 'react-icons/fc';
 import { Layout } from '../components/Layout';
+import { saveAs } from 'file-saver';
+import ChatSidebar from '../components/ChatSidebar';
+import { AiOutlineSave, AiOutlineDownload } from 'react-icons/ai';
+
 
 export default function ProtectedPage() {
   const { colorMode } = useColorMode();
   const bgColor = useColorModeValue('gray.100', 'gray.700');
-  const userBgColor = useColorModeValue('blue.100', 'blue.700');
-  const botBgColor = useColorModeValue('green.100', 'green.700');
+  const userBgColor = useColorModeValue('gray.200', 'gray.600');
+  //const botBgColor = useColorModeValue('green.100', 'green.700');
   const textColor = useColorModeValue('gray.700', 'white');
-
+  const buttonBgColor = useColorModeValue('blue.400', 'blue.300'); // Button background color
+  const buttonTextColor = useColorModeValue('white', 'gray.800'); // Button text color
+  const buttonHoverBgColor = useColorModeValue('blue.500', 'blue.400'); // Hover background color
+  
   const [chatHistory, setChatHistory] = useState([
-    { role: 'bot', message: "Bot : Hi, How can I assist you?" },
+    { role: 'bot', message: "Hi, How can I assist you?" },
   ]);
   const [message, setMessage] = useState('');
 
   const addMessageToChat = (role, message) => {
-    // setChatHistory([...chatHistory, { role, message }]);
     setChatHistory((prevHistory) => [...prevHistory, { role, message }]);
   };
 
@@ -55,7 +62,7 @@ export default function ProtectedPage() {
     const url = process.env.REACT_APP_TEXT_TO_IMAGE_API_URL;
     
     try {
-      addMessageToChat('user', `You : ${message}`);
+      addMessageToChat('user', `${message}`);
       setMessage('');
       const response = await fetch(url, {
         method: 'POST',
@@ -71,20 +78,41 @@ export default function ProtectedPage() {
 
       if (match) {
         const imageUrl = match[2]; // Second capture group contains the URL
-        addMessageToChat('bot', `Bot: ${botResponse.slice(0, match.index)}`);
+        addMessageToChat('bot', `${botResponse.slice(0, match.index)}`);
         addMessageToChat('image', `${imageUrl}`);
-        addMessageToChat('bot', `Bot: ${botResponse.slice(match.index + match[0].length)}`);
+        addMessageToChat('bot', `${botResponse.slice(match.index + match[0].length)}`);
         // Use imageUrl to display the image
       } else {
-        addMessageToChat('bot', `Bot: ${botResponse}`);
+        addMessageToChat('bot', `${botResponse}`);
       }
 
     } catch (error) {
       console.error('Error fetching response:', error);
       addMessageToChat('bot', 'Bot: Sorry, I encountered an error. Please try again later.');
     }
+  };
 
+// image is opening in a new tab
 
+{/*const downloadImage = (imageUrl) => {
+    try {
+      saveAs(imageUrl, 'image.jpg'); 
+    } catch (error) {
+      console.error('Error downloading image:', error);
+    }
+  }; */}
+  
+
+// cors error occured
+
+  const downloadImage = async (imageUrl) => {
+    try {
+      const response = await fetch(imageUrl);
+      const blob = await response.blob(); // Convert the image to a Blob
+      saveAs(blob, 'image.jpg'); // Use file-saver to trigger the download
+    } catch (error) {
+      console.error('Error downloading image:', error);
+    }
   };
 
   const Feature = ({ title, icon }) => {
@@ -106,10 +134,90 @@ export default function ProtectedPage() {
     );
   };
 
+  const handleNewChat = () => {
+    setChatHistory([{ role: 'bot', message: "Hi, How can I assist you?" }]);
+  };
+  
   return (
     <Layout>
-      <Container maxW={'7xl'}>
-        <Stack
+      <Container maxW={'7xl'}> 
+        <Stack spacing={4} mt={10} mb={20}>
+          <Flex>       
+            <Box bg={bgColor} w="35%" p={4}>
+              <ChatSidebar onNewChat={handleNewChat} />
+            </Box>
+            <Box w="65%" bg={bgColor} p={4} borderRadius="md" height="600px" display="flex" flexDirection="column">
+            <Box flex="1" overflowY="auto" p={3}>
+              <Stack spacing={3}>
+                {chatHistory.map((chat, index) => (
+                  <Box
+                    key={index}
+                    bg={chat.role === 'bot' || chat.role === 'image' ? bgColor : userBgColor}
+                    p={3}
+                    borderRadius="md"
+                    alignSelf={chat.role === 'bot' || chat.role === 'image' ? 'flex-start' : 'flex-end'}>
+                    {chat.role === 'image' ? (
+                      <div>
+                        <img src={chat.message} alt="Generated" width="300px" height="300px"/>
+                        {/* <a href={chat.message} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'underline', color: 'aqua' }}>Open image in new tab</a>*/}
+                        
+                                                
+                        <Button
+                          leftIcon={<AiOutlineSave />}
+                          mt={2}
+                          mr={2}
+                          bg={buttonBgColor}
+                          color={buttonTextColor}
+                          _hover={{ bg: buttonHoverBgColor }}
+                        >
+                          Save
+                        </Button>
+
+                        <Button
+                          leftIcon={<AiOutlineDownload />}
+                          onClick={() => downloadImage(chat.message)}
+                          mt={2}
+                          bg={buttonBgColor}
+                          color={buttonTextColor}
+                          _hover={{ bg: buttonHoverBgColor }}
+                        >
+                          Download
+                        </Button>
+
+                      </div>
+                    ) : (
+                      <span>{chat.message}</span>
+                    )}
+                  </Box>
+                ))}
+              </Stack>
+              </Box>
+            
+            <InputGroup size="md">
+              <Input
+                type="text"
+                placeholder="Type your message here..."
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                onKeyPress={handleKeyPress}
+                bg={userBgColor}
+                borderRadius="md"
+                focusBorderColor="blue.500"
+              />
+              <InputRightElement width="4.5rem">
+                <Button h="1.75rem" size="sm" onClick={sendMessage}>
+                  Send
+                </Button>
+              </InputRightElement>
+            </InputGroup>
+
+            
+            </Box>
+            </Flex>
+        </Stack>
+      </Container>
+
+      <Stack
           align={'center'}
           spacing={{ base: 2, md: 4 }}
           py={{ base: 2, md: 2 }}
@@ -119,7 +227,7 @@ export default function ProtectedPage() {
               lineHeight={1.1}
               fontWeight={600}>
               <Text as={'span'} color={'red.400'} fontSize={{ base: '2xl', sm: '3xl', lg: '4xl' }}>
-                How it works
+                Guidelines
               </Text>
               <br />
             </Heading>
@@ -147,52 +255,6 @@ export default function ProtectedPage() {
           </SimpleGrid>
         </Box>
 
-        <Stack spacing={4} mt={10} mb={20}>
-          <Text as={'span'} color={'black.400'} fontSize={{ base: 'xl', sm: '2xl', lg: '3xl' }}>
-            Chat with our Bot
-          </Text>
-          <Box bg={bgColor} p={4} borderRadius="md">
-            <Stack spacing={3}>
-              {chatHistory.map((chat, index) => (
-                <Box
-                  key={index}
-                  bg={chat.role === 'bot' || chat.role === 'image' ? botBgColor : userBgColor}
-                  p={3}
-                  borderRadius="md"
-                  alignSelf={chat.role === 'bot' || chat.role === 'image' ? 'flex-start' : 'flex-end'}>
-                  {/* {chat.message} */}
-                  {chat.role === 'image' ? (
-                    <div>
-                    <img src={chat.message} alt="Generated" width="200px" height="200px"/>
-                    <a href={chat.message} target="_blank" rel="noopener noreferrer"
-                    style={{ textDecoration: 'underline', color: 'aqua' }}>Open image in new tab</a>
-                    </div>
-                  ) : (
-                    <span>{chat.message}</span>
-                  )}
-                </Box>
-              ))}
-            </Stack>
-          </Box>
-          <InputGroup size="md">
-            <Input
-              type="text"
-              placeholder="Type your message here..."
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              onKeyPress={handleKeyPress}
-              bg={userBgColor}
-              borderRadius="md"
-              focusBorderColor="blue.500"
-            />
-            <InputRightElement width="4.5rem">
-              <Button h="1.75rem" size="sm" onClick={sendMessage}>
-                Send
-              </Button>
-            </InputRightElement>
-          </InputGroup>
-        </Stack>
-      </Container>
     </Layout>
   );
 }
