@@ -94,15 +94,7 @@ export default function Profilepage() {
           
 
 
-          <FormControl id="username" isRequired>
-            <FormLabel>User name</FormLabel>
-            <Input
-              placeholder="User name"
-              _placeholder={{ color: 'gray.500' }}
-              type="text"
-              value={currentUser && (currentUser.displayName || currentUser.username) }
-            />
-          </FormControl>
+          
 
           <FormControl id="email" isRequired>
             <FormLabel>Email address</FormLabel>
@@ -113,6 +105,8 @@ export default function Profilepage() {
               value={currentUser && currentUser.email}
             />
           </FormControl>
+
+          
           
         </Stack>
         </Flex>

@@ -65,9 +65,7 @@ export default function Registerpage() {
     setIsSubmitting(true)
     register(email, password)
       .then(async (res) => {
-        await res.user.updateProfile({
-          displayName: username,
-        });
+        
         navigate('/login')
       })
       .catch(error => {
@@ -113,19 +111,7 @@ export default function Registerpage() {
                 </FormControl>
 
                 
-                <FormControl id='usename'>
-                  <FormLabel>User Name</FormLabel>
-                  <Input
-                    name='username'
-                    type='username'
-                    autoComplete='username'
-                    required
-                    //value={username}
-                    value={currentUser && currentUser.displayName}
-                    onChange={e => setUserName(e.target.value)}
-                    borderColor={colorMode === 'light' ? 'gray.400' : 'gray.600'}
-                  />
-                </FormControl>
+                
 
 
                 <FormControl id='password'>
