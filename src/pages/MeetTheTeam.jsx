@@ -175,5 +175,3 @@ import {
     )
   }
   
-
-  {/*<TestimonialHeading>Job</TestimonialHeading> */}

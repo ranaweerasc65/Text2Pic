@@ -8,13 +8,12 @@ import {
   Box,
   SimpleGrid,
   Icon,
-  useColorMode,
   useColorModeValue,
   Button,
   Input,
   InputGroup,
   InputRightElement,
-  IconButton,
+  
 } from '@chakra-ui/react';
 import { FcComments, FcImageFile, FcCheckmark, FcDownload } from 'react-icons/fc';
 import { Layout } from '../components/Layout';
@@ -24,11 +23,11 @@ import { AiOutlineSave, AiOutlineDownload } from 'react-icons/ai';
 
 
 export default function ProtectedPage() {
-  const { colorMode } = useColorMode();
+  //const { colorMode } = useColorMode();
   const bgColor = useColorModeValue('gray.100', 'gray.700');
   const userBgColor = useColorModeValue('gray.200', 'gray.600');
   //const botBgColor = useColorModeValue('green.100', 'green.700');
-  const textColor = useColorModeValue('gray.700', 'white');
+  //const textColor = useColorModeValue('gray.700', 'white');
   const buttonBgColor = useColorModeValue('blue.400', 'blue.300'); // Button background color
   const buttonTextColor = useColorModeValue('white', 'gray.800'); // Button text color
   const buttonHoverBgColor = useColorModeValue('blue.500', 'blue.400'); // Hover background color
@@ -94,13 +93,13 @@ export default function ProtectedPage() {
 
 // image is opening in a new tab
 
-{/*const downloadImage = (imageUrl) => {
+/*const downloadImage = (imageUrl) => {
     try {
       saveAs(imageUrl, 'image.jpg'); 
     } catch (error) {
       console.error('Error downloading image:', error);
     }
-  }; */}
+  }; */
   
 
 // cors error occured

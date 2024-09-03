@@ -14,7 +14,7 @@ import galleryImg13 from '../../images/gallery_13.jpg'
 import galleryImg14 from '../../images/gallery_14.jpg'
 import galleryImg15 from '../../images/gallery_15.jpg'
 import galleryImg16 from '../../images/gallery_16.jpg'
-import galleryImg17 from '../../images/gallery_17.jpg'
+
 
 
 

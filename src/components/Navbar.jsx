@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Box,
   HStack,
@@ -34,7 +34,7 @@ export function Navbar() {
   const handleLogout = async () => {
     onClose();
     await logout();
-    alert('You are logging out now!!!');
+    
   };
 
   return (
@@ -95,11 +95,11 @@ export function Navbar() {
             </AlertDialogHeader>
 
             <AlertDialogBody>
-              Are you sure you want to logout? This action cannot be undone.
+              Are you sure you want to logout? 
             </AlertDialogBody>
 
             <AlertDialogFooter>
-              <Button ref={cancelRef} onClick={onClose}>
+              <Button ref={cancelRef} colorScheme='green' onClick={onClose}>
                 Cancel
               </Button>
               <Button colorScheme='red' onClick={handleLogout} ml={3}>

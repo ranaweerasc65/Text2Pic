@@ -21,9 +21,15 @@ import { Layout } from '../components/Layout'
 import { useAuth } from '../contexts/AuthContext'
 import { useMounted } from '../hooks/useMounted'
 import registerImage from '../images/register.jpg'
+
+
+
 export default function Registerpage() {
+
+  
   const navigate = useNavigate()
   const { signInWithGoogle, register } = useAuth()
+  const [username, setUserName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('') 
@@ -58,7 +64,10 @@ export default function Registerpage() {
 
     setIsSubmitting(true)
     register(email, password)
-      .then(res => {
+      .then(async (res) => {
+        await res.user.updateProfile({
+          displayName: username,
+        });
         navigate('/login')
       })
       .catch(error => {
@@ -87,6 +96,8 @@ export default function Registerpage() {
         <Box flex='1'>
           <Card maxW='md' mx='auto' mt={0} roundedRight='lg' bg={colorMode === 'light' ? 'gray.100': 'gray.700'}>
             <chakra.form onSubmit={handleSubmit}>
+
+
               <Stack spacing='6'>
                 <FormControl id='email'>
                   <FormLabel>Email address</FormLabel>
@@ -100,6 +111,23 @@ export default function Registerpage() {
                     borderColor={colorMode === 'light' ? 'gray.400' : 'gray.600'}
                   />
                 </FormControl>
+
+                
+                <FormControl id='usename'>
+                  <FormLabel>User Name</FormLabel>
+                  <Input
+                    name='username'
+                    type='username'
+                    autoComplete='username'
+                    required
+                    //value={username}
+                    value={currentUser && currentUser.displayName}
+                    onChange={e => setUserName(e.target.value)}
+                    borderColor={colorMode === 'light' ? 'gray.400' : 'gray.600'}
+                  />
+                </FormControl>
+
+
                 <FormControl id='password'>
                   <FormLabel>Password</FormLabel>
                   <Input

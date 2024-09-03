@@ -1,108 +1,121 @@
 import {
-  Button,
   FormControl,
   FormLabel,
   Input,
   Stack,
   useColorModeValue,
   Avatar,
-  AvatarBadge,
-  IconButton,
-  Card,
+  Flex,
   Center,
   Heading,
+  Button,
 } from '@chakra-ui/react';
-import { SmallCloseIcon } from '@chakra-ui/icons';
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Layout } from '../components/Layout'
 import { useAuth } from '../contexts/AuthContext'
+import { getStorage, ref, uploadBytes } from 'firebase/storage';
+import { upload } from '../utils/init-firebase';
+import { useState } from 'react';
+
 
 export default function Profilepage() {
+
+  const [photo, setPhoto] = useState(null)
+  const [loading, setLoading] = useState(false)
+
   const { currentUser } = useAuth()
+
+  function handleChange(e) {
+    if(e.target.files[0]){
+      setPhoto(e.target.files[0])
+    }else {
+      setPhoto(null);  
+    }
+    
+  }
+
+  function handleClick() {
+    if (!photo) {
+      alert("No file is selected");
+      return;
+    }
+    // Only proceed with upload if a photo is selected
+    upload(photo, currentUser, setLoading);
+  }
+
+  
+  
   return (
     <Layout>
       <Heading textAlign='center' my={12}>
-        User Profile
+        My Profile
       </Heading>
 
-      <Card maxW='md' mx='auto' mt={4}>
+      <Flex 
+        minH={'5vh'} 
+        align={'center'} 
+        justify={'center'} 
+      >
         <Stack
           spacing={4}
           w={'full'}
           maxW={'md'}
-          bg={useColorModeValue('white', 'gray.700')}
+          bg={useColorModeValue('gray.50', 'gray.700')}
           rounded={'xl'}
           boxShadow={'lg'}
           p={6}
           my={12}
         >
+          
           <Center>
-            <Avatar size="xl" src={currentUser && currentUser.photoURL}>
-              <AvatarBadge
-                as={IconButton}
-                size="sm"
-                rounded="full"
-                top="-10px"
-                colorScheme="red"
-                aria-label="remove Image"
-                icon={<SmallCloseIcon />}
-              />
-            </Avatar>
+            <Avatar size="xl" src={currentUser && currentUser.photoURL}></Avatar>  
           </Center>
 
-          <FormControl id="userName" isRequired>
+          <div 
+            style={{
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+            }}
+          >
+            <input type="file" onChange={handleChange} />
+            <Button
+              disabled={loading || !photo}
+              bg={useColorModeValue('gray.200', 'gray.600')}
+              color={useColorModeValue('black', 'white')}
+              w="200px"
+              h="30px"
+              onClick={handleClick}
+            >
+              Upload
+            </Button>
+          </div>
+
+          
+
+
+          <FormControl id="username" isRequired>
             <FormLabel>User name</FormLabel>
             <Input
-              placeholder="UserName"
+              placeholder="User name"
               _placeholder={{ color: 'gray.500' }}
               type="text"
-              value={currentUser && currentUser.displayName}
+              value={currentUser && (currentUser.displayName || currentUser.username) }
             />
           </FormControl>
 
           <FormControl id="email" isRequired>
             <FormLabel>Email address</FormLabel>
             <Input
-              placeholder="your-email@example.com"
+              placeholder="email@example.com"
               _placeholder={{ color: 'gray.500' }}
               type="email"
               value={currentUser && currentUser.email}
             />
           </FormControl>
-
-          <FormControl id="password" isRequired>
-            <FormLabel>Password</FormLabel>
-            <Input
-              placeholder="password"
-              _placeholder={{ color: 'gray.500' }}
-              type="password"
-            />
-          </FormControl>
-
-          <Stack spacing={6} direction={['column', 'row']}>
-            <Button
-              bg={'red.400'}
-              color={'white'}
-              w="full"
-              _hover={{
-                bg: 'red.500',
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              bg={'blue.400'}
-              color={'white'}
-              w="full"
-              _hover={{
-                bg: 'blue.500',
-              }}
-            >
-              Submit
-            </Button>
-          </Stack>
+          
         </Stack>
-      </Card>
+        </Flex>
     </Layout>
   )
 }

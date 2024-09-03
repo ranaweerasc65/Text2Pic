@@ -6,7 +6,7 @@ import {
 } from '@chakra-ui/react'
 import React from 'react'
 import { Layout } from '../components/Layout'
-import { useAuth } from '../contexts/AuthContext'
+// import { useAuth } from '../contexts/AuthContext'
 import { useNavigate } from 'react-router-dom';
 import ImagesGallery from '../components/Image-gallery/ImagesGallery';
 import heroImage from '../images/heroimage.jpg';
@@ -19,7 +19,7 @@ import leafImage from '../images/leaf.jpg';
 
 
 export default function Homepage() {
-  const {currentUser}= useAuth()
+  //const {currentUser}= useAuth()
   const navigate = useNavigate()
 
   return (
@@ -509,7 +509,7 @@ export default function Homepage() {
   )
 }
 
-{/* STYLES*/}
+
 export const Blob = (props) => {
   return (
     <Icon
