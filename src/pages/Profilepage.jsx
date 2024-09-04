@@ -91,11 +91,6 @@ export default function Profilepage() {
             </Button>
           </div>
 
-          
-
-
-          
-
           <FormControl id="email" isRequired>
             <FormLabel>Email address</FormLabel>
             <Input

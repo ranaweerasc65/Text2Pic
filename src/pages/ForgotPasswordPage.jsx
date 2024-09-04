@@ -22,7 +22,7 @@ export default function ForgotPasswordPage() {
   const [email,setEmail] = useState('')
   const {forgotPassword} = useAuth()
   const toast = useToast()
-  // const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   return (
     <Layout>

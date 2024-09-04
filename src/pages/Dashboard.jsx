@@ -20,7 +20,10 @@ import { Layout } from '../components/Layout';
 import { saveAs } from 'file-saver';
 import ChatSidebar from '../components/ChatSidebar';
 import { AiOutlineSave, AiOutlineDownload } from 'react-icons/ai';
-
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+//import { storage, auth } from '../firebase';  // Import storage and auth from your firebase.js
+//import { auth } from '../utils/init-firebase';
+import { storage, auth } from '../utils/init-firebase';  // Adjust the path according to your project structure
 
 export default function ProtectedPage() {
   //const { colorMode } = useColorMode();
@@ -91,6 +94,59 @@ export default function ProtectedPage() {
     }
   };
 
+
+  const saveImageToFirebase = async (imageUrl) => {
+    try {
+      // Fetch the image blob
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+  
+      // Get the current user
+      const user = auth.currentUser;
+  
+      if (user) {
+        const userId = user.uid;
+  
+        // Create a reference to the storage location
+        const storageRef = ref(storage, `images/${userId}/${Date.now()}_image.jpg`);
+  
+        // Upload the file
+        const uploadTask = uploadBytesResumable(storageRef, blob);
+  
+        uploadTask.on(
+          'state_changed',
+          (snapshot) => {
+            // Observe state change events such as progress, pause, and resume
+            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            console.log('Upload is ' + progress + '% done');
+          },
+          (error) => {
+            // Handle unsuccessful uploads
+            console.error('Upload failed:', error);
+          },
+          () => {
+            // Handle successful uploads on complete
+            getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+              console.log('File available at', downloadURL);
+              // You can save this downloadURL in your database if you need
+            });
+          }
+        );
+      } else {
+        console.error('No user signed in');
+      }
+    } catch (error) {
+      console.error('Error uploading image:', error);
+    }
+  };
+  
+  const handleSaveButtonClick = (imageUrl) => {
+    saveImageToFirebase(imageUrl);
+  };
+
+
+
+
 // image is opening in a new tab
 
 /*const downloadImage = (imageUrl) => {
@@ -136,6 +192,8 @@ export default function ProtectedPage() {
   const handleNewChat = () => {
     setChatHistory([{ role: 'bot', message: "Hi, How can I assist you?" }]);
   };
+
+
   
   return (
     <Layout>
@@ -168,6 +226,7 @@ export default function ProtectedPage() {
                           bg={buttonBgColor}
                           color={buttonTextColor}
                           _hover={{ bg: buttonHoverBgColor }}
+                          onClick={() => handleSaveButtonClick(chat.message)}
                         >
                           Save
                         </Button>

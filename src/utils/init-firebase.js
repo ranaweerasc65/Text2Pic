@@ -12,6 +12,7 @@ const firebaseConfig = {
     messagingSenderId: process.env.REACT_APP_MESSAGING_SENDER_ID,
     appId: process.env.REACT_APP_APP_ID,
     measurementId: "G-GEW56R95WG"
+    
 };
 
 // Initialize Firebase
@@ -19,7 +20,8 @@ const app = initializeApp(firebaseConfig);
 // const analytics = getAnalytics(app);
 
 export const auth = getAuth(app)
-const storage = getStorage();
+//const storage = getStorage();
+export const storage = getStorage(app);
 
 //storage
 export async function upload(file , currentUser, setLoading){
