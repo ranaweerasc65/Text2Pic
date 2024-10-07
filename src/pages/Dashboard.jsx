@@ -203,7 +203,12 @@ const downloadImage = (imageUrl) => {
           <Flex>       
             <Box bg={bgColor}  p={4}>
               
-              <Button mt={4} colorScheme="teal" onClick={handleNewChat}>
+              <Button mt={4} 
+                      bg={buttonBgColor}
+                      color={buttonTextColor}
+                      _hover={{ bg: buttonHoverBgColor }} 
+                      onClick={handleNewChat}
+              >
                  New Chat
               </Button>
             </Box>
@@ -273,7 +278,14 @@ const downloadImage = (imageUrl) => {
                 focusBorderColor="blue.500"
               />
               <InputRightElement width="4.5rem">
-                <Button h="1.75rem" size="sm" onClick={sendMessage}>
+                <Button 
+                h="1.75rem" 
+                size="sm" 
+                onClick={sendMessage}
+                bg={buttonBgColor}
+                color={buttonTextColor}
+                _hover={{ bg: buttonHoverBgColor }}
+              >
                   Send
                 </Button>
               </InputRightElement>
