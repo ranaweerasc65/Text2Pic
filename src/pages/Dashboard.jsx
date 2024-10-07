@@ -245,7 +245,7 @@ const downloadImage = (imageUrl) => {
                         >
                           Save
                         </Button>
-
+{/* 
                         <Button
                           leftIcon={<AiOutlineDownload />}
                           onClick={() => downloadImage(chat.message)}
@@ -255,6 +255,21 @@ const downloadImage = (imageUrl) => {
                           _hover={{ bg: buttonHoverBgColor }}
                         >
                           Download
+                        </Button>
+*/}
+                        <Button
+                          as="a"
+                          href={chat.message}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          download="generated_image.jpg"
+                          leftIcon={<AiOutlineDownload />}
+                          mt={2}
+                          bg={buttonBgColor}
+                          color={buttonTextColor}
+                          _hover={{ bg: buttonHoverBgColor }}
+                        >
+                        Download
                         </Button>
 
                       </div>
