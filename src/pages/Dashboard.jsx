@@ -18,7 +18,6 @@ import {
 import { FcComments, FcImageFile, FcCheckmark, FcDownload } from 'react-icons/fc';
 import { Layout } from '../components/Layout';
 import { saveAs } from 'file-saver';
-import ChatSidebar from '../components/ChatSidebar';
 import { AiOutlineSave, AiOutlineDownload } from 'react-icons/ai';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 //import { storage, auth } from '../firebase';  // Import storage and auth from your firebase.js
@@ -149,17 +148,17 @@ export default function ProtectedPage() {
 
 // image is opening in a new tab
 
-/*const downloadImage = (imageUrl) => {
+const downloadImage = (imageUrl) => {
     try {
       saveAs(imageUrl, 'image.jpg'); 
     } catch (error) {
       console.error('Error downloading image:', error);
     }
-  }; */
+  }; 
   
 
 // cors error occured
-
+/*
   const downloadImage = async (imageUrl) => {
     try {
       const response = await fetch(imageUrl);
@@ -169,6 +168,8 @@ export default function ProtectedPage() {
       console.error('Error downloading image:', error);
     }
   };
+*/
+
 
   const Feature = ({ title, icon }) => {
     return (
@@ -200,10 +201,14 @@ export default function ProtectedPage() {
       <Container maxW={'7xl'}> 
         <Stack spacing={4} mt={10} mb={20}>
           <Flex>       
-            <Box bg={bgColor} w="35%" p={4}>
-              <ChatSidebar onNewChat={handleNewChat} />
+            <Box bg={bgColor}  p={4}>
+              
+              <Button mt={4} colorScheme="teal" onClick={handleNewChat}>
+                 New Chat
+              </Button>
             </Box>
-            <Box w="65%" bg={bgColor} p={4} borderRadius="md" height="600px" display="flex" flexDirection="column">
+            
+            <Box w="100%" bg={bgColor} p={4} borderRadius="md" height="600px" display="flex" flexDirection="column">
             <Box flex="1" overflowY="auto" p={3}>
               <Stack spacing={3}>
                 {chatHistory.map((chat, index) => (
@@ -215,7 +220,12 @@ export default function ProtectedPage() {
                     alignSelf={chat.role === 'bot' || chat.role === 'image' ? 'flex-start' : 'flex-end'}>
                     {chat.role === 'image' ? (
                       <div>
-                        <img src={chat.message} alt="Generated" width="300px" height="300px"/>
+                        <img src={chat.message} 
+                        alt="Generated" 
+                        width="300px" 
+                        height="300px" 
+                        onClick={downloadImage}
+                        />
                         {/* <a href={chat.message} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'underline', color: 'aqua' }}>Open image in new tab</a>*/}
                         
                                                 
