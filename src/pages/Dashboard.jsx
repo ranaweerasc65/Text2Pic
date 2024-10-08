@@ -96,22 +96,22 @@ export default function ProtectedPage() {
 
   const saveImageToFirebase = async (imageUrl) => {
     try {
-      // Fetch the image blob
-      const response = await fetch(imageUrl);
+      // Fetch the image blob using CORS Anywhere
+      const response = await fetch(`https://cors-anywhere.herokuapp.com/${imageUrl}`);
       const blob = await response.blob();
-  
+
       // Get the current user
       const user = auth.currentUser;
-  
+
       if (user) {
         const userId = user.uid;
-  
+
         // Create a reference to the storage location
         const storageRef = ref(storage, `images/${userId}/${Date.now()}_image.jpg`);
-  
+
         // Upload the file
         const uploadTask = uploadBytesResumable(storageRef, blob);
-  
+
         uploadTask.on(
           'state_changed',
           (snapshot) => {
@@ -127,7 +127,7 @@ export default function ProtectedPage() {
             // Handle successful uploads on complete
             getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
               console.log('File available at', downloadURL);
-              // You can save this downloadURL in your database if you need
+              // You can save this downloadURL in your database if needed
             });
           }
         );
@@ -138,6 +138,7 @@ export default function ProtectedPage() {
       console.error('Error uploading image:', error);
     }
   };
+
   
   const handleSaveButtonClick = (imageUrl) => {
     saveImageToFirebase(imageUrl);
