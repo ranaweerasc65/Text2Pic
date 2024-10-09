@@ -17,19 +17,13 @@ import {
 } from '@chakra-ui/react';
 import { FcComments, FcImageFile, FcCheckmark, FcDownload } from 'react-icons/fc';
 import { Layout } from '../components/Layout';
-import { saveAs } from 'file-saver';
 import { AiOutlineSave, AiOutlineDownload } from 'react-icons/ai';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
-//import { storage, auth } from '../firebase';  // Import storage and auth from your firebase.js
-//import { auth } from '../utils/init-firebase';
-import { storage, auth } from '../utils/init-firebase';  // Adjust the path according to your project structure
+import { storage, auth } from '../utils/init-firebase';
 
 export default function ProtectedPage() {
-  //const { colorMode } = useColorMode();
   const bgColor = useColorModeValue('gray.100', 'gray.700');
   const userBgColor = useColorModeValue('gray.200', 'gray.600');
-  //const botBgColor = useColorModeValue('green.100', 'green.700');
-  //const textColor = useColorModeValue('gray.700', 'white');
   const buttonBgColor = useColorModeValue('blue.400', 'blue.300'); // Button background color
   const buttonTextColor = useColorModeValue('white', 'gray.800'); // Button text color
   const buttonHoverBgColor = useColorModeValue('blue.500', 'blue.400'); // Hover background color
@@ -127,7 +121,12 @@ export default function ProtectedPage() {
             // Handle successful uploads on complete
             getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
               console.log('File available at', downloadURL);
-              // You can save this downloadURL in your database if needed
+              
+              // Save downloadURL in a global or state variable for later use
+            window.generatedImageDownloadURL = downloadURL;
+
+            // Show success message, no download triggered here
+            alert('Image successfully saved.');
             });
           }
         );
@@ -139,37 +138,33 @@ export default function ProtectedPage() {
     }
   };
 
-  
+   // Handle the Save button click
   const handleSaveButtonClick = (imageUrl) => {
     saveImageToFirebase(imageUrl);
   };
 
+  // Handle the Download button click
+  const handleDownloadButtonClick = () => {
+  const downloadURL = window.generatedImageDownloadURL;
+  if (downloadURL) {
+    downloadImage(downloadURL); 
+    //openImageInNewTab(downloadURL); // Open the image in a new tab
+  } else {
+    alert('Please save the image first before downloading.');
+  }
+};
 
 
-
-// image is opening in a new tab
-
-const downloadImage = (imageUrl) => {
-    try {
-      saveAs(imageUrl, 'image.jpg'); 
-    } catch (error) {
-      console.error('Error downloading image:', error);
-    }
-  }; 
-  
-
-// cors error occured
-/*
-  const downloadImage = async (imageUrl) => {
-    try {
-      const response = await fetch(imageUrl);
-      const blob = await response.blob(); // Convert the image to a Blob
-      saveAs(blob, 'image.jpg'); // Use file-saver to trigger the download
-    } catch (error) {
-      console.error('Error downloading image:', error);
-    }
+  const downloadImage = (url) => {
+    // Create an anchor element
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'generated_image.jpg'; // Set the filename for the download
+    document.body.appendChild(a); // Append the anchor to the body
+    a.click(); // Programmatically click the anchor to trigger the download
+    document.body.removeChild(a); // Clean up by removing the anchor
+    console.log('Image is downloaded succesfully.')
   };
-*/
 
 
   const Feature = ({ title, icon }) => {
@@ -230,7 +225,7 @@ const downloadImage = (imageUrl) => {
                         alt="Generated" 
                         width="300px" 
                         height="300px" 
-                        onClick={downloadImage}
+                        //onClick={downloadImage}
                         />
                         {/* <a href={chat.message} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'underline', color: 'aqua' }}>Open image in new tab</a>*/}
                         
@@ -242,23 +237,28 @@ const downloadImage = (imageUrl) => {
                           bg={buttonBgColor}
                           color={buttonTextColor}
                           _hover={{ bg: buttonHoverBgColor }}
-                          onClick={() => handleSaveButtonClick(chat.message)}
+                          //onClick={() => handleSaveButtonClick(chat.message)}
+                          onClick={(e) => {
+                            e.stopPropagation(); // Prevents the click event from propagating to other elements
+                            handleSaveButtonClick(chat.message); // Only triggers save to Firebase
+                          }}
                         >
                           Save
                         </Button>
-{/* 
+
                         <Button
                           leftIcon={<AiOutlineDownload />}
-                          onClick={() => downloadImage(chat.message)}
                           mt={2}
+                          mr={2}
                           bg={buttonBgColor}
                           color={buttonTextColor}
                           _hover={{ bg: buttonHoverBgColor }}
+                          onClick={() => handleDownloadButtonClick(chat.message)}
                         >
                           Download
                         </Button>
-*/}
-                        <Button
+{/*
+<Button
                           as="a"
                           href={chat.message}
                           target="_blank"
@@ -273,6 +273,8 @@ const downloadImage = (imageUrl) => {
                         Download
                         </Button>
 
+ */}
+                        
                       </div>
                     ) : (
                       <span>{chat.message}</span>
