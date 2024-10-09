@@ -1,13 +1,10 @@
 import React, { useState } from 'react';
 import {
-  Heading,
   Container,
   Stack,
   Text,
   Flex,
   Box,
-  SimpleGrid,
-  Icon,
   useColorModeValue,
   Button,
   Input,
@@ -15,11 +12,11 @@ import {
   InputRightElement,
   
 } from '@chakra-ui/react';
-import { FcComments, FcImageFile, FcCheckmark, FcDownload } from 'react-icons/fc';
+//import { FcComments, FcImageFile, FcCheckmark, FcDownload } from 'react-icons/fc';
 import { Layout } from '../components/Layout';
 import { AiOutlineSave, AiOutlineDownload } from 'react-icons/ai';
-import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
-import { storage, auth } from '../utils/init-firebase';
+//import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+//import { storage, auth } from '../utils/init-firebase';
 
 export default function ProtectedPage() {
   const bgColor = useColorModeValue('gray.100', 'gray.700');
@@ -87,7 +84,7 @@ export default function ProtectedPage() {
     }
   };
 
-
+{/*
   const saveImageToFirebase = async (imageUrl) => {
     try {
       // Fetch the image blob using CORS Anywhere
@@ -103,8 +100,11 @@ export default function ProtectedPage() {
         // Create a reference to the storage location
         const storageRef = ref(storage, `images/${userId}/${Date.now()}_image.jpg`);
 
+        // Create a new Blob with the correct MIME type
+        const imageBlob = new Blob([blob], { type: 'image/jpeg' });
+
         // Upload the file
-        const uploadTask = uploadBytesResumable(storageRef, blob);
+        const uploadTask = uploadBytesResumable(storageRef, imageBlob);
 
         uploadTask.on(
           'state_changed',
@@ -120,10 +120,14 @@ export default function ProtectedPage() {
           () => {
             // Handle successful uploads on complete
             getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+
+              console.log('Image is saved succesfully.')
               console.log('File available at', downloadURL);
               
               // Save downloadURL in a global or state variable for later use
             window.generatedImageDownloadURL = downloadURL;
+            
+            
 
             // Show success message, no download triggered here
             alert('Image successfully saved.');
@@ -137,13 +141,16 @@ export default function ProtectedPage() {
       console.error('Error uploading image:', error);
     }
   };
+ 
+  
 
    // Handle the Save button click
   const handleSaveButtonClick = (imageUrl) => {
     saveImageToFirebase(imageUrl);
   };
 
-  // Handle the Download button click
+  // Handle the Download button click using downloadurl
+
   const handleDownloadButtonClick = () => {
   const downloadURL = window.generatedImageDownloadURL;
   if (downloadURL) {
@@ -153,8 +160,8 @@ export default function ProtectedPage() {
     alert('Please save the image first before downloading.');
   }
 };
-
-
+*/}
+{/*
   const downloadImage = (url) => {
     // Create an anchor element
     const a = document.createElement('a');
@@ -165,8 +172,81 @@ export default function ProtectedPage() {
     document.body.removeChild(a); // Clean up by removing the anchor
     console.log('Image is downloaded succesfully.')
   };
+   */}
+  
+{/*
+   const downloadImage = (url, mimeType = 'image/jpg') => {
+    console.log('Download URL:', url); // Debugging the URL
+    fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.blob();
+      })
+      .then((blob) => {
+        const file = new Blob([blob], { type: mimeType });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(file);
+        a.download = `text2pic_image.${mimeType.split('/')[1]}`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      })
+      .catch((error) => {
+        console.error('Download failed:', error);
+      });
+      console.log('Image is downloaded succesfully.')
+  };
+  
+  */}
 
+  // Handle the Download button click using directly imageurl
+const handleDownloadButtonClick = (imageUrl) => {
+  if (imageUrl) {
+      downloadImage(imageUrl); // Use the passed imageUrl directly
+  } else {
+      alert('Please save the image first before downloading.');
+  }
+};
 
+const downloadImage = (url, mimeType = 'image/jpeg') => {
+  console.log('Download URL:', url); // Debugging the URL
+  fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`)
+  
+      .then((response) => {
+          if (!response.ok) {
+              throw new Error('Network response was not ok');
+          }
+          //return response.blob(); // Convert response to a Blob (Binary Large Object)
+          return response.json(); // allorigins returns a JSON object
+      })
+      .then((data) => {
+        // Extract the actual image data from the `contents` field
+        const decodedData = atob(data.contents.split(',')[1]); // Decode base64 content
+        const byteArray = new Uint8Array(decodedData.length);
+  
+        // Convert the decoded base64 string into a byte array
+        for (let i = 0; i < decodedData.length; i++) {
+          byteArray[i] = decodedData.charCodeAt(i);
+        }
+      // Create a Blob from the byte array and download it
+      const blob = new Blob([byteArray], { type: mimeType });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `text2pic_image.${mimeType.split('/')[1]}`; // Filename for the download
+      document.body.appendChild(a);
+      a.click(); // Trigger the download
+      document.body.removeChild(a); // Clean up
+    })
+      .catch((error) => {
+          console.error('Download failed:', error);
+      });
+
+  console.log('Image is downloaded successfully.');
+};
+
+  
   const Feature = ({ title, icon }) => {
     return (
       <Stack spacing={2}>
@@ -190,8 +270,6 @@ export default function ProtectedPage() {
     setChatHistory([{ role: 'bot', message: "Hi, How can I assist you?" }]);
   };
 
-
-  
   return (
     <Layout>
       <Container maxW={'7xl'}> 
@@ -257,8 +335,8 @@ export default function ProtectedPage() {
                         >
                           Download
                         </Button>
-{/*
-<Button
+                        {/*
+                        <Button
                           as="a"
                           href={chat.message}
                           target="_blank"
@@ -273,7 +351,7 @@ export default function ProtectedPage() {
                         Download
                         </Button>
 
- */}
+                      */}
                         
                       </div>
                     ) : (
@@ -314,8 +392,8 @@ export default function ProtectedPage() {
             </Flex>
         </Stack>
       </Container>
-
-      <Stack
+{/*
+ <Stack
           align={'center'}
           spacing={{ base: 2, md: 4 }}
           py={{ base: 2, md: 2 }}
@@ -352,6 +430,8 @@ export default function ProtectedPage() {
             />
           </SimpleGrid>
         </Box>
+ */}
+     
 
     </Layout>
   );
