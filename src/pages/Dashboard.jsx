@@ -307,8 +307,7 @@ const downloadImage = (url, mimeType = 'image/jpeg') => {
                         />
                         {/* <a href={chat.message} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'underline', color: 'aqua' }}>Open image in new tab</a>*/}
                         
-                                                
-                        <Button
+                          {/*<Button
                           leftIcon={<AiOutlineSave />}
                           mt={2}
                           mr={2}
@@ -322,7 +321,8 @@ const downloadImage = (url, mimeType = 'image/jpeg') => {
                           }}
                         >
                           Save
-                        </Button>
+                        </Button> */}                      
+                        
 
                         <Button
                           leftIcon={<AiOutlineDownload />}
