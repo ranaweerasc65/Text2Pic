@@ -13,7 +13,6 @@ import {
 import React, { useEffect } from 'react'
 import { Layout } from '../components/Layout'
 import { useAuth } from '../contexts/AuthContext'
-import { getStorage, ref, uploadBytes } from 'firebase/storage';
 import { upload } from '../utils/init-firebase';
 import { useState } from 'react';
 
@@ -22,8 +21,15 @@ export default function Profilepage() {
 
   const [photo, setPhoto] = useState(null)
   const [loading, setLoading] = useState(false)
-
+  const [email, setEmail] = useState('');
   const { currentUser } = useAuth()
+
+  useEffect(() => {
+    if (currentUser) {
+      setEmail(currentUser.email); // Initialize email with currentUser's email
+    }
+  }, [currentUser]);
+
 
   function handleChange(e) {
     if(e.target.files[0]){
@@ -97,7 +103,8 @@ export default function Profilepage() {
               placeholder="email@example.com"
               _placeholder={{ color: 'gray.500' }}
               type="email"
-              value={currentUser && currentUser.email}
+              value={email} // Controlled input
+              onChange={(e) => setEmail(e.target.value)} 
             />
           </FormControl>
 
