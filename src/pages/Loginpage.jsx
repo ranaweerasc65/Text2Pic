@@ -84,7 +84,7 @@ const { colorMode } = useColorMode();
                   toast({
                     description: error.message,
                     status: 'error',
-                    duration: 9000,
+                    duration: 5000,
                     isClosable: true,
                   });
                 } finally {
@@ -150,7 +150,7 @@ const { colorMode } = useColorMode();
                   signInWithGoogle()
                     .then((user) => {
                       handleRedirectToOrBack();
-                      navigate('/dashboard');
+                      navigate('/home');
                     })
                     .catch((e) => console.log(e.message))
                 }

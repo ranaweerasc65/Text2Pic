@@ -65,7 +65,13 @@ export default function Registerpage() {
     setIsSubmitting(true)
     register(email, password)
       .then(async (res) => {
-        
+        toast({
+          title: 'Account created.',
+          description: "We've created your account for you.Please Login.",
+          status: 'success',
+          duration: 5000,
+          isClosable: true,
+        })
         navigate('/login')
       })
       .catch(error => {
@@ -73,7 +79,7 @@ export default function Registerpage() {
         toast({
           description: error.message,
           status: 'error',
-          duration: 9000,
+          duration: 5000,
           isClosable: true,
         })
       })
