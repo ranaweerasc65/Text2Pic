@@ -57,10 +57,15 @@ export default function ProtectedPage() {
   };
 
   const matchImageURL = (message) => {
-    const regex = /\[(.*?)\]\((.*?)\)/; 
-    const match = message.match(regex);
-    return match;
-  }
+    const markdownRegex = /\[(.*?)\]\((.*?)\)/;
+    const markdownMatch = message.match(markdownRegex);
+    if (markdownMatch) {
+        return markdownMatch;
+    }
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const urlMatch = message.match(urlRegex);
+    return urlMatch;
+  };
 
   const sendMessage = async () => {
     if (!message.trim()) return;
