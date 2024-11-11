@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
   Container,
   Stack,
+  Text,
   Flex,
   Box,
   useColorModeValue,
@@ -32,6 +33,9 @@ export default function ProtectedPage() {
   const [chatHistory, setChatHistory] = useState([{ role: 'bot', message: "Hi, How can I assist you?" },]);
   const [message, setMessage] = useState('');
   const chatContainerRef = useRef(null); 
+  const [downloadButtonText, setDownloadButtonText] = useState('Download');
+  const [downloadButtonColor, setDownloadButtonColor] = useState(downloadbuttonBgColor);
+
   
   const scrollToBottom = () => {
     if (chatContainerRef.current) {
@@ -42,12 +46,25 @@ export default function ProtectedPage() {
     }
   };
  
-   useEffect(() => {
-     scrollToBottom();
-   }, [chatHistory]);
+  useEffect(() => {
+    const savedChatHistory = localStorage.getItem('chatHistory');
+    if (savedChatHistory) {
+      setChatHistory(JSON.parse(savedChatHistory));
+    }
+    scrollToBottom();
+  }, []);
 
-  const addMessageToChat = (role, message) => {
-    setChatHistory((prevHistory) => [...prevHistory, { role, message }]);
+  useEffect(() => {
+    scrollToBottom();
+  }, [chatHistory]);
+
+  
+   const addMessageToChat = (role, message) => {
+    setChatHistory((prevHistory) => {
+      const updatedHistory = [...prevHistory, { role, message }];
+      localStorage.setItem('chatHistory', JSON.stringify(updatedHistory)); 
+      return updatedHistory;
+    });
   };
 
   const handleKeyPress = (e) => {
@@ -113,22 +130,26 @@ export default function ProtectedPage() {
 
 
 
-const handleDownloadButtonClick = (imageUrl) => {
-  if (imageUrl) {
+  const handleDownloadButtonClick = (imageUrl) => {
+    if (imageUrl) {
+      setDownloadButtonText('Downloading...');
+      setDownloadButtonColor('purple.600'); 
       downloadImage(imageUrl); 
-  } else {
-    toast({
-      title: 'No Image Available',
-      description: "Please generate and save the image first before downloading.",
-      status: 'warning',
-      duration: 3000,
-      isClosable: true,
-    });
-  }
-};
+    } else {
+      toast({
+        title: 'No Image Available',
+        description: "Please generate and save the image first before downloading.",
+        status: 'warning',
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
+  
 
 const downloadImage = (url, mimeType = 'image/jpeg') => {
-  setIsLoading(true); 
+  setIsLoading(true);
+  
   console.log('Download URL:', url); 
   fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`)
   
@@ -154,6 +175,8 @@ const downloadImage = (url, mimeType = 'image/jpeg') => {
       a.click();
       document.body.removeChild(a);
       setIsLoading(false);
+      setDownloadButtonText('Download'); 
+      setDownloadButtonColor('pink.600'); 
       toast({
         title: 'Download Successful',
         description: "Your image has been downloaded.",
@@ -178,9 +201,11 @@ const downloadImage = (url, mimeType = 'image/jpeg') => {
 };
 
   
-  const handleNewChat = () => {
-    setChatHistory([{ role: 'bot', message: "Hi, How can I assist you?" }]);
-  };
+const handleNewChat = () => {
+  setChatHistory([{ role: 'bot', message: "Hi, How can I assist you?" }]);
+  localStorage.removeItem('chatHistory');
+};
+
 
   return (
     <Layout>
@@ -222,16 +247,15 @@ const downloadImage = (url, mimeType = 'image/jpeg') => {
                           leftIcon={<AiOutlineDownload />}
                           mt={2}
                           mr={2}
-                          bg={downloadbuttonBgColor}
+                          bg={downloadButtonColor}
                           color={downloadbuttonTextColor}
                           _hover={{ bg: downloadbuttonHoverBgColor }}
                           onClick={() => handleDownloadButtonClick(chat.message)}
                           width="300px"
                         >
-                          Download
+                          {downloadButtonText}
                         </Button>
-                        
-                        
+
                       </div>
                     ) : (
                       <span>{chat.message}</span>
@@ -240,7 +264,7 @@ const downloadImage = (url, mimeType = 'image/jpeg') => {
                 ))}
               
               {isTyping && <Spinner size="sm" color="blue.500" />} 
-              {isLoading && <Spinner size="lg" color="blue.500" />} 
+              {isLoading && <Spinner size="lg" color="pink.600" />} 
               
 
               </Stack>
@@ -269,7 +293,10 @@ const downloadImage = (url, mimeType = 'image/jpeg') => {
                   Send
                 </Button>
               </InputRightElement>
-            </InputGroup>    
+            </InputGroup>
+
+            
+                
             </Box>
             </Flex>
         </Stack>

@@ -63,7 +63,7 @@ export default function Homepage() {
           colorScheme={'red'}
           bg={'red.400'}
           _hover={{ bg: 'red.500' }}
-          onClick={() => navigate('/login')}
+          onClick={() => navigate('/dashboard')}
         >
           Get Started
         </Button>
@@ -235,7 +235,7 @@ export default function Homepage() {
               colorScheme={'red'}
               bg={'red.400'}
               _hover={{ bg: 'red.500' }}
-              onClick={() => navigate('/login')}>
+              onClick={() => navigate('/dashboard')}>
               Get Started
             </Button>
           </Stack>
