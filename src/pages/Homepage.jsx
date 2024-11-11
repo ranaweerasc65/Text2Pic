@@ -2,7 +2,7 @@ import {
   Heading,
   Text,
   useColorModeValue,Circle,
-  Flex,Container,Stack,Button,Icon,Box,Image,
+  Flex,Container,Stack,Button,Icon,Box,Image,useColorMode,
 } from '@chakra-ui/react'
 import React from 'react'
 import { Layout } from '../components/Layout'
@@ -21,6 +21,7 @@ import leafImage from '../images/leaf.jpg';
 export default function Homepage() {
   //const {currentUser}= useAuth()
   const navigate = useNavigate()
+  const { colorMode } = useColorMode();
 
   return (
     <Layout>
@@ -42,7 +43,8 @@ export default function Homepage() {
         </Text>
       </Heading>
       <Text
-        color={'gray.600'}
+        
+        color={colorMode === 'light' ? 'white.400' : 'gray.300'}
         fontSize={{ base: 'lg', md: 'xl' }}
         textAlign={{ base: 'center', md: 'left' }}
       >
@@ -218,7 +220,8 @@ export default function Homepage() {
               Text2Pic
             </Text>
           </Heading>
-          <Text color={'gray.500'} fontSize="lg">
+          
+          <Text color={colorMode === 'light' ? 'white.400' : 'gray.300'} fontSize="lg">
           Text2Pic is an innovative tool designed to enhance children's English learning experience.<br/>
           Text2Pic allows children to create their own image-based vocabulary, categorize them, and access them anytime, anywhere. 
           Best of all, it's completely free! <br/>
@@ -281,7 +284,7 @@ export default function Homepage() {
             Making communication effortless!
             </Text>
           </Heading>
-          <Text color={'gray.500'} fontSize="lg">
+          <Text color={colorMode === 'light' ? 'white.400' : 'gray.300'} fontSize="lg">
           If you feel like creating your own image instead of using one of our 140+ million stock images, 
           you can certainly do that with our text-to-image AI.
           <br/>
@@ -387,7 +390,7 @@ export default function Homepage() {
             Text to Image
             </Text>
           </Heading>
-          <Text color={'gray.500'} fontSize="lg">
+          <Text color={colorMode === 'light' ? 'white.400' : 'gray.300'} fontSize="lg">
           Say goodbye to complicated instructions and external tools. 
           <br/> With our easy-to-use interface, children can learn English through the power of images. 
           <br/> Simply express your idea in simple terms and navigate through our preset styles, colors, and camera angles to create captivating images. 
@@ -437,7 +440,7 @@ export default function Homepage() {
             photorealistic pictures
             </Text>
           </Heading>
-          <Text color={'gray.500'} fontSize="lg">
+          <Text color={colorMode === 'light' ? 'white.400' : 'gray.300'} fontSize="lg">
           Experience the magic of turning your imagination into reality with our advanced photo generation technology. 
           <br/> Create stunning, lifelike images that look like they were captured by a professional photographer. 
           <br/> Whether you're designing for a project, enhancing your presentations, or simply unleashing your creativity, our tool empowers you to generate photorealistic pictures with ease. 
