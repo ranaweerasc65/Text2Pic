@@ -1,7 +1,7 @@
 import {
     Container,
     Heading,Stack,
-    Text,Flex,Box,Image,
+    Text,Flex,Box,Image,useColorMode,
   } from '@chakra-ui/react'
   import React from 'react'
   import { Layout } from '../components/Layout'
@@ -10,8 +10,10 @@ import {
   import newImage from '../images/new.jpg';
 
   export default function OurStoryPage() {
-
+    const { colorMode } = useColorMode();
     return (
+      
+
       <Layout>
         <Container maxW={'7xl'}>
 
@@ -31,7 +33,7 @@ import {
               {" "}Text2Pic
             </Text>
           </Heading>
-          <Text color={'gray.500'} fontSize="lg"align={'center'} justify={'center'}>
+          <Text color={colorMode === 'light' ? 'white.400' : 'gray.300'} fontSize="lg"align={'center'} justify={'center'}>
           Text2Pic emerged in 2024 as an innovative online tool 
           crafted for children's English learning.
           Initially conceived as a platform for creating 
@@ -81,7 +83,7 @@ import {
             <br />
             
           </Heading>
-          <Text color={'gray.500'} fontSize="lg">
+          <Text color={colorMode === 'light' ? 'white.400' : 'gray.300'} fontSize="lg">
           At Text2Pic, we utilize Generative Adversarial Networks (GANs) to seamlessly transform textual descriptions into vibrant, lifelike images. What sets us apart is our integration of GANs with interactive user feedback, revolutionizing text-to-image synthesis. This unique approach ensures continuous refinement, enhancing image quality and user engagement.
           </Text>  
         </Stack>
@@ -167,7 +169,7 @@ import {
             </Text>
             
           </Heading>
-          <Text color={'gray.500'} fontSize="lg">
+          <Text color={colorMode === 'light' ? 'white.400' : 'gray.300'} fontSize="lg">
           Text2Pic's user interface is intuitively designed, featuring a user-friendly chatbot interface. Seamlessly integrated, it allows users to provide continuous feedback, enhancing the image creation process effortlessly.
           </Text>
           
@@ -199,7 +201,7 @@ import {
             <br />
             
           </Heading>
-          <Text color={'gray.500'} fontSize="lg">
+          <Text color={colorMode === 'light' ? 'white.400' : 'gray.300'} fontSize="lg">
           Implement strategies within the GAN framework
           to ensure a broad range of image outputs, capturing various aspects of the given
           textual descriptions.
