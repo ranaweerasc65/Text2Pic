@@ -150,7 +150,7 @@ const { colorMode } = useColorMode();
                   signInWithGoogle()
                     .then((user) => {
                       handleRedirectToOrBack();
-                      navigate('/home');
+                      navigate('/dashboard');
                     })
                     .catch((e) => console.log(e.message))
                 }

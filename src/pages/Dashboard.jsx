@@ -49,20 +49,20 @@ export default function ProtectedPage() {
   useEffect(() => {
     const savedChatHistory = localStorage.getItem('chatHistory');
     if (savedChatHistory) {
-      setChatHistory(JSON.parse(savedChatHistory)); // Load chat history from localStorage
+      setChatHistory(JSON.parse(savedChatHistory));
     }
-    scrollToBottom(); // Scroll to bottom after loading chat
-  }, []); // This effect will run only once when the component mounts
+    scrollToBottom();
+  }, []);
 
   useEffect(() => {
-    scrollToBottom(); // Scroll to bottom every time the chat history changes
-  }, [chatHistory]); // Effect triggers whenever chatHistory is updated
+    scrollToBottom();
+  }, [chatHistory]);
 
   
    const addMessageToChat = (role, message) => {
     setChatHistory((prevHistory) => {
       const updatedHistory = [...prevHistory, { role, message }];
-      localStorage.setItem('chatHistory', JSON.stringify(updatedHistory)); // Save to localStorage
+      localStorage.setItem('chatHistory', JSON.stringify(updatedHistory)); 
       return updatedHistory;
     });
   };
@@ -198,7 +198,7 @@ const downloadImage = (url, mimeType = 'image/jpeg') => {
   
 const handleNewChat = () => {
   setChatHistory([{ role: 'bot', message: "Hi, How can I assist you?" }]);
-  localStorage.removeItem('chatHistory'); // Clear the chat history from localStorage
+  localStorage.removeItem('chatHistory');
 };
 
 
@@ -288,7 +288,10 @@ const handleNewChat = () => {
                   Send
                 </Button>
               </InputRightElement>
-            </InputGroup>    
+            </InputGroup>
+
+            
+                
             </Box>
             </Flex>
         </Stack>
