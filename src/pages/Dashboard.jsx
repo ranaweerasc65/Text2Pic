@@ -1,21 +1,19 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
-  Container,
-  Stack,
-  Text,
-  Flex,
   Box,
-  useColorModeValue,
   Button,
+  Container,
+  Flex,
   Input,
   InputGroup,
   InputRightElement,
-  
+  Spinner,
+  Stack,
+  useColorModeValue,
+  useToast,
 } from '@chakra-ui/react';
 import { Layout } from '../components/Layout';
-import {AiOutlineDownload } from 'react-icons/ai';
-import { useToast } from '@chakra-ui/react';
-import { Spinner } from '@chakra-ui/react';
+import { AiOutlineDownload } from 'react-icons/ai';
 
 
 export default function ProtectedPage() {
@@ -69,64 +67,93 @@ export default function ProtectedPage() {
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
-      sendMessage();
+      sendMessage().then(r => {});
     }
   };
 
+
+  //const urlRegex = /(https?:\/\/[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(\/[^\s]*)?)/g;
   const matchImageURL = (message) => {
-    const markdownRegex = /\[(.*?)\]\((.*?)\)/;
+    console.log("Incoming message:", message);
+    localStorage.setItem("lastMessage", message);
+
+    const markdownRegex = /\[(.*?)\]\((https?:\/\/[^\s]+)\)/;
     const markdownMatch = message.match(markdownRegex);
     if (markdownMatch) {
-        return markdownMatch;
+
+      return markdownMatch[2];
     }
-    const urlRegex = /(https?:\/\/[^\s]+)/g;
-    const urlMatch = message.match(urlRegex);
-    return urlMatch;
+
+    const urlRegex = /(https?:\/\/[^\s,]+)/g;
+    const plainUrlMatch = message.match(urlRegex);
+    if (plainUrlMatch && plainUrlMatch.length > 0) {
+      return plainUrlMatch[0];
+    }
+    return null;
+  };
+
+
+
+  const harmfulKeywords = [
+    'violence', 'abuse', 'drugs', 'hate', 'murder', 'terrorism', 'explicit',
+    'pornography', 'explicit', 'racism', 'sex', 'mutilation', 'illegal', 'self-harm',
+    'terrorist', 'slaughter', 'rape', 'weapon', 'bomb', 'blood', 'bullying',
+    'injury', 'death', 'gore', 'war', 'assault', 'torture', 'threat', 'firearm',
+    'explosion', 'explosive','pistol'
+  ];
+
+  const containsHarmfulContent = (input) => {
+    return harmfulKeywords.some(keyword => input.toLowerCase().includes(keyword));
   };
 
   const sendMessage = async () => {
     if (!message.trim()) return;
-    const payload = {
-      human_msg: message
-    };
+
+    // Check for harmful content in the message before proceeding
+    if (containsHarmfulContent(message)) {
+      addMessageToChat('bot', 'Sorry, I cannot generate this image due to content restrictions.');
+      return;
+    }
+
+    const payload = { human_msg: message };
     const url = process.env.REACT_APP_TEXT_TO_IMAGE_API_URL;
-    
+
     try {
-      addMessageToChat('user', `${message}`);
+      addMessageToChat('user', message);
       setMessage('');
-      setIsTyping(true); 
+      setIsTyping(true);
 
       const response = await fetch(url, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 
       const responseData = await response.json();
       const botResponse = responseData.ai_msg;
-      const match = matchImageURL(botResponse);
+      const imageUrl = matchImageURL(botResponse);
 
       setIsTyping(false);
 
-      if (match) {
-        const imageUrl = match[2]; 
-        addMessageToChat('bot', `${botResponse.slice(0, match.index)}`);
-        
-        setIsLoading(true);
-        addMessageToChat('image', `${imageUrl}`);
-        addMessageToChat('bot', `${botResponse.slice(match.index + match[0].length)}`);
-        setIsLoading(false);
-      } else {
-        addMessageToChat('bot', `${botResponse}`);
-      }
+      // Remove Markdown links and any URLs from the bot's response
+      const textPart = botResponse.replace(/\[.*?\]\(https?:\/\/[^\s]+?\)/g, '').trim();
 
+      if (imageUrl) {
+        addMessageToChat('bot', textPart);
+        addMessageToChat('image', imageUrl); // Display the image
+      } else {
+        addMessageToChat('bot', botResponse); // Display the response without the image URL
+      }
     } catch (error) {
       console.error('Error fetching response:', error);
-      addMessageToChat('bot', 'Bot: Sorry, I encountered an error. Please try again later.');
+      addMessageToChat('bot', 'Sorry, I encountered an error. Please try again.');
+      setIsTyping(false);
     }
   };
+
+
+
+
 
 
 
