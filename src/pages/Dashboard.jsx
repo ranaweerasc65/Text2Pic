@@ -239,6 +239,14 @@ const handleNewChat = () => {
   localStorage.removeItem('chatHistory');
 };
 
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      handleNewChat();
+    }, 6 * 60 * 60 * 1000);
+    return () => clearInterval(intervalId);
+  }, []);
+
+
 
   return (
     <Layout>

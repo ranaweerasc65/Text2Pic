@@ -46,7 +46,7 @@ export default function Profilepage() {
       return;
     }
     // Only proceed with upload if a photo is selected
-    upload(photo, currentUser, setLoading);
+    upload(photo, currentUser, setLoading).then(r => {});
   }
 
   
