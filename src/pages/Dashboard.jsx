@@ -116,9 +116,8 @@ export default function ProtectedPage() {
 
 
   const imageCache = new Map();
-  const maxRetries = 3;
 
-  const sendMessage = async (retryCount = 0) => {
+  const sendMessage = async () => {
     if (!message.trim()) return;
 
     // Check for harmful content in the message before proceeding
@@ -133,17 +132,9 @@ export default function ProtectedPage() {
     // Check if the message already has a cached image URL
     if (imageCache.has(message)) {
       const cachedImageUrl = imageCache.get(message);
-      // Display the cached image URL
       addMessageToChat('user', message);
       addMessageToChat('bot', 'Here is the image based on your previous request.');
       addMessageToChat('image', cachedImageUrl);
-
-      // Verify if the image loads correctly
-      if (!isImageLoaded(cachedImageUrl) && retryCount < maxRetries) {
-        console.log('Image failed to load, retrying request...');
-        await sendMessage(retryCount + 1); // Retry fetching the image
-      }
-
       setMessage('');
       return;
     }
@@ -174,11 +165,8 @@ export default function ProtectedPage() {
 
         // Cache the image URL
         imageCache.set(message, imageUrl);
-      } else if (retryCount < maxRetries) {
-        console.log('No image found, retrying request...');
-        await sendMessage(retryCount + 1); // Retry fetching the image
       } else {
-        addMessageToChat('bot', 'Sorry, I was unable to generate an image.');
+        addMessageToChat('bot', botResponse);
       }
     } catch (error) {
       console.error('Error fetching response:', error);
@@ -187,15 +175,6 @@ export default function ProtectedPage() {
     }
   };
 
-// Helper function to verify if the image loads correctly
-  const isImageLoaded = (url) => {
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.onload = () => resolve(true);
-      img.onerror = () => resolve(false);
-      img.src = url;
-    });
-  };
 
 
 
