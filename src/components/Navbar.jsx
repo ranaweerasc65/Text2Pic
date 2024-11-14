@@ -18,6 +18,7 @@ import {
   AlertDialogHeader,
   AlertDialogBody,
   AlertDialogFooter,
+  useBreakpointValue, // Import useBreakpointValue
 } from '@chakra-ui/react';
 import { FaMoon, FaSun, FaUserCircle } from 'react-icons/fa';
 import Navlink from './Navlink';
@@ -31,78 +32,84 @@ export function Navbar() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const cancelRef = React.useRef();
 
+  // Responsive values
+  const logoWidth = useBreakpointValue({ base: '80px', md: '100px' });
+  const iconSize = useBreakpointValue({ base: 'sm', md: 'md' });
+  const spacing = useBreakpointValue({ base: 2, md: 4 });
+  const buttonSize = useBreakpointValue({ base: 'sm', md: 'md' });
+
   const handleLogout = async () => {
     onClose();
     await logout();
-    
   };
 
   return (
     <Box
-      borderBottom='2px'
+      borderBottom="2px"
       borderBottomColor={useColorModeValue('gray.100', 'gray.700')}
       mb={4}
-      mx={{ base: 4, md: 8 }} 
+      mx={{ base: 4, md: 8 }}
     >
       <HStack
         py={4}
-        justifyContent='space-between' 
-        alignItems='center' 
-        maxW='container.lg'
-        mx='auto'
-        px={{ base: 4, md: 0 }} 
+        justifyContent="space-between"
+        alignItems="center"
+        maxW="container.lg"
+        mx="auto"
+        px={{ base: 4, md: 0 }}
+        spacing={spacing} // Adjust spacing based on screen size
       >
         {/* Logo with RouterLink */}
-        <RouterLink to='/'>
-          <Image w="100px" src={logo} alt="Company Logo" />
+        <RouterLink to="/">
+          <Image w={logoWidth} src={logo} alt="Company Logo" /> {/* Responsive logo width */}
         </RouterLink>
-        
+
         {/* Navlinks and other components */}
-        <HStack spacing={4}>
-          {!currentUser && <Navlink to='/login' name='Login' />}
-          
-          {currentUser && <Navlink to='/dashboard' name='Dashboard' />}
-          
+        <HStack spacing={spacing}>
+          {!currentUser && <Navlink to="/login" name="Login" />}
+          {currentUser && <Navlink to="/dashboard" name="Dashboard" />}
+
           {currentUser && (
             <Menu>
-              <MenuButton as={IconButton} icon={<FaUserCircle />} aria-label="Profile Menu" variant="outline" />
+              <MenuButton
+                as={IconButton}
+                icon={<FaUserCircle />}
+                aria-label="Profile Menu"
+                variant="outline"
+                size={iconSize} // Adjust icon size
+              />
               <MenuList>
-                <Navlink to='/profile' name='Profile' />
+                <Navlink to="/profile" name="Profile" />
                 <MenuItem onClick={onOpen}>Logout</MenuItem>
               </MenuList>
             </Menu>
           )}
 
           <IconButton
-            variant='outline'
+            variant="outline"
             icon={useColorModeValue(<FaSun />, <FaMoon />)}
             onClick={toggleColorMode}
-            aria-label='toggle-dark-mode'
+            aria-label="toggle-dark-mode"
+            size={iconSize} // Adjust icon size
           />
         </HStack>
       </HStack>
 
       {/* AlertDialog for logout confirmation */}
-      <AlertDialog
-        isOpen={isOpen}
-        leastDestructiveRef={cancelRef}
-        onClose={onClose}
-      >
+      <AlertDialog isOpen={isOpen} leastDestructiveRef={cancelRef} onClose={onClose}>
         <AlertDialogOverlay>
           <AlertDialogContent>
-            <AlertDialogHeader fontSize='lg' fontWeight='bold'>
+            <AlertDialogHeader fontSize="lg" fontWeight="bold">
               Confirm Logout
             </AlertDialogHeader>
 
-            <AlertDialogBody>
-              Are you sure you want to logout? 
-            </AlertDialogBody>
+            <AlertDialogBody>Are you sure you want to logout?</AlertDialogBody>
 
             <AlertDialogFooter>
-              <Button ref={cancelRef} colorScheme='green' onClick={onClose}>
+              <Button ref={cancelRef} colorScheme="green" onClick={onClose} size={buttonSize}>
                 Cancel
               </Button>
-              <Button colorScheme='red' onClick={handleLogout} ml={3}>
+              <Button colorScheme="red" onClick={handleLogout} ml={3} size={buttonSize}>
                 Logout
               </Button>
             </AlertDialogFooter>

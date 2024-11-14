@@ -14,7 +14,7 @@ import {
 } from '@chakra-ui/react';
 import { Layout } from '../components/Layout';
 import { AiOutlineDownload } from 'react-icons/ai';
-
+import { useBreakpointValue } from "@chakra-ui/react";
 
 export default function ProtectedPage() {
   const toast = useToast();
@@ -26,6 +26,12 @@ export default function ProtectedPage() {
   const downloadbuttonBgColor = useColorModeValue('pink.600', 'pink.400');
   const downloadbuttonTextColor = useColorModeValue('white', 'gray.800'); 
   const downloadbuttonHoverBgColor = useColorModeValue('pink.700', 'pink.500');
+
+  const buttonPadding = useBreakpointValue({ base: 2, md: 4 });
+  const buttonFontSize = useBreakpointValue({ base: "sm", md: "md" });
+  const buttonWidth = useBreakpointValue({ base: "100px", md: "auto" });
+  const buttonMinWidth = useBreakpointValue({ base: "80px", md: "auto" });
+
   const [isLoading, setIsLoading] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [chatHistory, setChatHistory] = useState([{ role: 'bot', message: "Hi, How can I assist you?" },]);
@@ -236,22 +242,35 @@ const handleNewChat = () => {
 
   return (
     <Layout>
-      <Container maxW={'7xl'}> 
-        <Stack spacing={4} mt={10} mb={20}>
-          <Flex>       
-            <Box bg={bgColor}  p={4}>
-              
-              <Button mt={4} 
-                      bg={buttonBgColor}
-                      color={buttonTextColor}
-                      _hover={{ bg: buttonHoverBgColor }} 
-                      onClick={handleNewChat}
-              >
-                 New Chat
-              </Button>
-            </Box>
-            
-            <Box w="100%" bg={bgColor} p={4} borderRadius="md" height="600px" display="flex" flexDirection="column">
+      <Container maxW={'7xl'}>
+        <Stack spacing={4} mt={10} mb={20} direction="column">
+
+          <Box align="left">
+            <Button
+              bg={buttonBgColor}
+              color={buttonTextColor}
+              _hover={{ bg: buttonHoverBgColor }}
+              fontSize={buttonFontSize}
+              px={buttonPadding}
+              width={buttonWidth}
+              minWidth={buttonMinWidth}
+              whiteSpace="nowrap"
+              onClick={handleNewChat}
+            >
+              New Chat
+            </Button>
+          </Box>
+
+          {/* Chat container below the button */}
+          <Box
+            w="100%"
+            bg={bgColor}
+            p={4}
+            borderRadius="md"
+            height="600px"
+            display="flex"
+            flexDirection="column"
+          >
             <Box ref={chatContainerRef} flex="1" overflowY="auto" p={3}>
               <Stack spacing={3}>
                 {chatHistory.map((chat, index) => (
@@ -260,16 +279,11 @@ const handleNewChat = () => {
                     bg={chat.role === 'bot' || chat.role === 'image' ? bgColor : userBgColor}
                     p={3}
                     borderRadius="md"
-                    alignSelf={chat.role === 'bot' || chat.role === 'image' ? 'flex-start' : 'flex-end'}>
+                    alignSelf={chat.role === 'bot' || chat.role === 'image' ? 'flex-start' : 'flex-end'}
+                  >
                     {chat.role === 'image' ? (
                       <div>
-                        <img src={chat.message} 
-                        alt="Generated" 
-                        width="300px" 
-                        height="300px" 
-                        
-                        />
-                        
+                        <img src={chat.message} alt="Generated" width="300px" height="300px" />
                         <Button
                           leftIcon={<AiOutlineDownload />}
                           mt={2}
@@ -282,21 +296,18 @@ const handleNewChat = () => {
                         >
                           {downloadButtonText}
                         </Button>
-
                       </div>
                     ) : (
                       <span>{chat.message}</span>
                     )}
                   </Box>
                 ))}
-              
-              {isTyping && <Spinner size="sm" color="blue.500" />} 
-              {isLoading && <Spinner size="lg" color="pink.600" />} 
-              
-
+                {isTyping && <Spinner size="sm" color="blue.500" />}
+                {isLoading && <Spinner size="lg" color="pink.600" />}
               </Stack>
-              </Box>
-            
+            </Box>
+
+            {/* Message input area */}
             <InputGroup size="md">
               <Input
                 type="text"
@@ -309,25 +320,22 @@ const handleNewChat = () => {
                 focusBorderColor="blue.500"
               />
               <InputRightElement width="4.5rem">
-                <Button 
-                h="1.75rem" 
-                size="sm" 
-                onClick={sendMessage}
-                bg={buttonBgColor}
-                color={buttonTextColor}
-                _hover={{ bg: buttonHoverBgColor }}
-              >
+                <Button
+                  h="1.75rem"
+                  size="sm"
+                  onClick={sendMessage}
+                  bg={buttonBgColor}
+                  color={buttonTextColor}
+                  _hover={{ bg: buttonHoverBgColor }}
+                >
                   Send
                 </Button>
               </InputRightElement>
             </InputGroup>
-
-            
-                
-            </Box>
-            </Flex>
+          </Box>
         </Stack>
       </Container>
     </Layout>
   );
+
 }
