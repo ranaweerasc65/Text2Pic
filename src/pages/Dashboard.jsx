@@ -1,51 +1,54 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
-  Container,
-  Stack,
-  Text,
-  Flex,
   Box,
-  useColorModeValue,
   Button,
+  Container,
   Input,
   InputGroup,
   InputRightElement,
-  
+  Spinner,
+  Stack,
+  useColorModeValue,
+  useToast,
 } from '@chakra-ui/react';
 import { Layout } from '../components/Layout';
-import {AiOutlineDownload } from 'react-icons/ai';
-import { useToast } from '@chakra-ui/react';
-import { Spinner } from '@chakra-ui/react';
-
+import { AiOutlineDownload } from 'react-icons/ai';
+import { useBreakpointValue } from "@chakra-ui/react";
 
 export default function ProtectedPage() {
   const toast = useToast();
   const bgColor = useColorModeValue('gray.100', 'gray.700');
   const userBgColor = useColorModeValue('gray.200', 'gray.600');
   const buttonBgColor = useColorModeValue('blue.400', 'blue.300');
-  const buttonTextColor = useColorModeValue('white', 'gray.800'); 
-  const buttonHoverBgColor = useColorModeValue('blue.500', 'blue.400'); 
+  const buttonTextColor = useColorModeValue('white', 'gray.800');
+  const buttonHoverBgColor = useColorModeValue('blue.500', 'blue.400');
   const downloadbuttonBgColor = useColorModeValue('pink.600', 'pink.400');
-  const downloadbuttonTextColor = useColorModeValue('white', 'gray.800'); 
+  const downloadbuttonTextColor = useColorModeValue('white', 'gray.800');
   const downloadbuttonHoverBgColor = useColorModeValue('pink.700', 'pink.500');
+
+  const buttonPadding = useBreakpointValue({ base: 2, md: 4 });
+  const buttonFontSize = useBreakpointValue({ base: "sm", md: "md" });
+  const buttonWidth = useBreakpointValue({ base: "100px", md: "auto" });
+  const buttonMinWidth = useBreakpointValue({ base: "80px", md: "auto" });
+
   const [isLoading, setIsLoading] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [chatHistory, setChatHistory] = useState([{ role: 'bot', message: "Hi, How can I assist you?" },]);
   const [message, setMessage] = useState('');
-  const chatContainerRef = useRef(null); 
+  const chatContainerRef = useRef(null);
   const [downloadButtonText, setDownloadButtonText] = useState('Download');
   const [downloadButtonColor, setDownloadButtonColor] = useState(downloadbuttonBgColor);
 
-  
+
   const scrollToBottom = () => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTo({
         top: chatContainerRef.current.scrollHeight,
-        behavior: 'smooth', 
+        behavior: 'smooth',
       });
     }
   };
- 
+
   useEffect(() => {
     const savedChatHistory = localStorage.getItem('chatHistory');
     if (savedChatHistory) {
@@ -58,75 +61,139 @@ export default function ProtectedPage() {
     scrollToBottom();
   }, [chatHistory]);
 
-  
-   const addMessageToChat = (role, message) => {
+
+
+
+  const addMessageToChat = (role, message) => {
     setChatHistory((prevHistory) => {
       const updatedHistory = [...prevHistory, { role, message }];
-      localStorage.setItem('chatHistory', JSON.stringify(updatedHistory)); 
+      localStorage.setItem('chatHistory', JSON.stringify(updatedHistory));
       return updatedHistory;
     });
   };
 
+
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
-      sendMessage();
+      sendMessage().then(r => {
+      });
     }
   };
 
-  const matchImageURL = (message) => {
-    const markdownRegex = /\[(.*?)\]\((.*?)\)/;
-    const markdownMatch = message.match(markdownRegex);
-    if (markdownMatch) {
-        return markdownMatch;
-    }
-    const urlRegex = /(https?:\/\/[^\s]+)/g;
-    const urlMatch = message.match(urlRegex);
-    return urlMatch;
+
+  //const urlRegex = /(https?:\/\/[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(\/[^\s]*)?)/g;
+
+
+  const harmfulKeywords = [
+    'violence', 'abuse', 'drugs', 'hate', 'murder', 'terrorism', 'explicit',
+    'pornography', 'explicit', 'racism', 'sex', 'mutilation', 'illegal', 'self-harm',
+    'terrorist', 'slaughter', 'rape', 'weapon', 'bomb', 'blood', 'bullying',
+    'injury', 'death', 'gore', 'war', 'assault', 'torture', 'threat', 'firearm',
+    'explosion', 'explosive', 'pistol'
+  ];
+
+  const containsHarmfulContent = (input) => {
+    return harmfulKeywords.some(keyword => input.toLowerCase().includes(keyword));
   };
+
+
+
 
   const sendMessage = async () => {
     if (!message.trim()) return;
-    const payload = {
-      human_msg: message
-    };
+
+    // Check for harmful content in the message before proceeding
+    if (containsHarmfulContent(message)) {
+      addMessageToChat('bot', 'Sorry, I cannot generate this image due to content restrictions.');
+      return;
+    }
+
+    const payload = { human_msg: message };
     const url = process.env.REACT_APP_TEXT_TO_IMAGE_API_URL;
-    
+
     try {
-      addMessageToChat('user', `${message}`);
+      addMessageToChat('user', message);
       setMessage('');
-      setIsTyping(true); 
+      setIsTyping(true);
 
       const response = await fetch(url, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 
       const responseData = await response.json();
-      const botResponse = responseData.ai_msg;
-      const match = matchImageURL(botResponse);
+      let botResponse = responseData.ai_msg;
 
       setIsTyping(false);
 
+      // Use matchImageURL to process the response and extract URL
+      const match = matchImageURL(botResponse);
+
       if (match) {
-        const imageUrl = match[2]; 
-        addMessageToChat('bot', `${botResponse.slice(0, match.index)}`);
-        
+        // Remove the URL from the bot's response
+        botResponse = botResponse.replace(match, '').trim();
+
+        // Clean the response text (remove brackets and Markdown-like formatting)
+        botResponse = cleanText(botResponse);
+
+        // Display the cleaned text
+        if (botResponse) {
+          addMessageToChat('bot', botResponse);
+        }
+
+        // Display the extracted image URL
         setIsLoading(true);
-        addMessageToChat('image', `${imageUrl}`);
-        addMessageToChat('bot', `${botResponse.slice(match.index + match[0].length)}`);
+        addMessageToChat('image', match);
         setIsLoading(false);
       } else {
-        addMessageToChat('bot', `${botResponse}`);
+        // Clean the response text if no URL found
+        botResponse = cleanText(botResponse);
+        addMessageToChat('bot', botResponse);
       }
-
     } catch (error) {
       console.error('Error fetching response:', error);
-      addMessageToChat('bot', 'Bot: Sorry, I encountered an error. Please try again later.');
+      addMessageToChat('bot', 'Sorry, I encountered an error. Please try again.');
+      setIsTyping(false);
     }
   };
+
+// Function to clean text
+  const cleanText = (text) => {
+    // Remove Markdown-style links and brackets
+    return text.replace(/\[(.*?)\]\((.*?)\)|[()\[\]]/g, '').trim();
+  };
+
+
+  const matchImageURL = (message) => {
+    console.log("Incoming message:", message);
+    localStorage.setItem("lastMessage", message);
+
+    // Match Markdown-style links [Text](URL)
+    const markdownRegex = /\[(.*?)\]\((https?:\/\/[^\s,)\]]+)\)/;
+    const markdownMatch = message.match(markdownRegex);
+    if (markdownMatch) {
+      console.log("Matched Markdown link:", markdownMatch[2]);
+      return markdownMatch[2]; // Return the extracted URL
+    }
+
+    // Match plain URLs
+    const urlRegex = /(https?:\/\/[^\s,)\]]+)/g;
+    const plainUrlMatch = message.match(urlRegex);
+    if (plainUrlMatch && plainUrlMatch.length > 0) {
+      console.log("Matched plain URL:", plainUrlMatch[0]);
+      return plainUrlMatch[0]; // Return the first matched URL
+    }
+
+    console.log("No URL found.");
+    return null;
+  };
+
+
+
+
+
+
 
 
 
@@ -206,25 +273,46 @@ const handleNewChat = () => {
   localStorage.removeItem('chatHistory');
 };
 
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      handleNewChat();
+    }, 6 * 60 * 60 * 1000);
+    return () => clearInterval(intervalId);
+  }, []);
+
+
 
   return (
     <Layout>
-      <Container maxW={'7xl'}> 
-        <Stack spacing={4} mt={10} mb={20}>
-          <Flex>       
-            <Box bg={bgColor}  p={4}>
-              
-              <Button mt={4} 
-                      bg={buttonBgColor}
-                      color={buttonTextColor}
-                      _hover={{ bg: buttonHoverBgColor }} 
-                      onClick={handleNewChat}
-              >
-                 New Chat
-              </Button>
-            </Box>
-            
-            <Box w="100%" bg={bgColor} p={4} borderRadius="md" height="600px" display="flex" flexDirection="column">
+      <Container maxW={'7xl'}>
+        <Stack spacing={4} mt={10} mb={20} direction="column">
+
+          <Box align="left">
+            <Button
+              bg={buttonBgColor}
+              color={buttonTextColor}
+              _hover={{ bg: buttonHoverBgColor }}
+              fontSize={buttonFontSize}
+              px={buttonPadding}
+              width={buttonWidth}
+              minWidth={buttonMinWidth}
+              whiteSpace="nowrap"
+              onClick={handleNewChat}
+            >
+              New Chat
+            </Button>
+          </Box>
+
+          {/* Chat container below the button */}
+          <Box
+            w="100%"
+            bg={bgColor}
+            p={4}
+            borderRadius="md"
+            height="600px"
+            display="flex"
+            flexDirection="column"
+          >
             <Box ref={chatContainerRef} flex="1" overflowY="auto" p={3}>
               <Stack spacing={3}>
                 {chatHistory.map((chat, index) => (
@@ -233,16 +321,11 @@ const handleNewChat = () => {
                     bg={chat.role === 'bot' || chat.role === 'image' ? bgColor : userBgColor}
                     p={3}
                     borderRadius="md"
-                    alignSelf={chat.role === 'bot' || chat.role === 'image' ? 'flex-start' : 'flex-end'}>
+                    alignSelf={chat.role === 'bot' || chat.role === 'image' ? 'flex-start' : 'flex-end'}
+                  >
                     {chat.role === 'image' ? (
                       <div>
-                        <img src={chat.message} 
-                        alt="Generated" 
-                        width="300px" 
-                        height="300px" 
-                        
-                        />
-                        
+                        <img src={chat.message} alt="Generated" width="300px" height="300px" />
                         <Button
                           leftIcon={<AiOutlineDownload />}
                           mt={2}
@@ -255,21 +338,18 @@ const handleNewChat = () => {
                         >
                           {downloadButtonText}
                         </Button>
-
                       </div>
                     ) : (
                       <span>{chat.message}</span>
                     )}
                   </Box>
                 ))}
-              
-              {isTyping && <Spinner size="sm" color="blue.500" />} 
-              {isLoading && <Spinner size="lg" color="pink.600" />} 
-              
-
+                {isTyping && <Spinner size="sm" color="blue.500" />}
+                {isLoading && <Spinner size="lg" color="pink.600" />}
               </Stack>
-              </Box>
-            
+            </Box>
+
+            {/* Message input area */}
             <InputGroup size="md">
               <Input
                 type="text"
@@ -282,25 +362,22 @@ const handleNewChat = () => {
                 focusBorderColor="blue.500"
               />
               <InputRightElement width="4.5rem">
-                <Button 
-                h="1.75rem" 
-                size="sm" 
-                onClick={sendMessage}
-                bg={buttonBgColor}
-                color={buttonTextColor}
-                _hover={{ bg: buttonHoverBgColor }}
-              >
+                <Button
+                  h="1.75rem"
+                  size="sm"
+                  onClick={sendMessage}
+                  bg={buttonBgColor}
+                  color={buttonTextColor}
+                  _hover={{ bg: buttonHoverBgColor }}
+                >
                   Send
                 </Button>
               </InputRightElement>
             </InputGroup>
-
-            
-                
-            </Box>
-            </Flex>
+          </Box>
         </Stack>
       </Container>
     </Layout>
   );
+
 }
