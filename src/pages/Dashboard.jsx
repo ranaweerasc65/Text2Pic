@@ -14,6 +14,7 @@ import {
 import { Layout } from '../components/Layout';
 import { AiOutlineDownload } from 'react-icons/ai';
 import { useBreakpointValue } from "@chakra-ui/react";
+import { useAuth } from '../contexts/AuthContext';
 
 export default function ProtectedPage() {
   const toast = useToast();
@@ -39,7 +40,9 @@ export default function ProtectedPage() {
   const [downloadButtonText, setDownloadButtonText] = useState('Download');
   const [downloadButtonColor, setDownloadButtonColor] = useState(downloadbuttonBgColor);
 
-  
+
+
+
   const scrollToBottom = () => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTo({
@@ -61,14 +64,23 @@ export default function ProtectedPage() {
     scrollToBottom();
   }, [chatHistory]);
 
-  
+  useEffect(() => {
+
+    handleNewChat();
+  }, []);
+
+
+
    const addMessageToChat = (role, message) => {
     setChatHistory((prevHistory) => {
       const updatedHistory = [...prevHistory, { role, message }];
-      localStorage.setItem('chatHistory', JSON.stringify(updatedHistory)); 
+      localStorage.setItem('chatHistory', JSON.stringify(updatedHistory));
       return updatedHistory;
     });
   };
+
+
+
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
@@ -115,7 +127,7 @@ export default function ProtectedPage() {
 
 
 
-  const imageCache = new Map();
+
 
   const sendMessage = async () => {
     if (!message.trim()) return;
@@ -128,16 +140,6 @@ export default function ProtectedPage() {
 
     const payload = { human_msg: message };
     const url = process.env.REACT_APP_TEXT_TO_IMAGE_API_URL;
-
-    // Check if the message already has a cached image URL
-    if (imageCache.has(message)) {
-      const cachedImageUrl = imageCache.get(message);
-      addMessageToChat('user', message);
-      addMessageToChat('bot', 'Here is the image based on your previous request.');
-      addMessageToChat('image', cachedImageUrl);
-      setMessage('');
-      return;
-    }
 
     try {
       addMessageToChat('user', message);
@@ -152,20 +154,22 @@ export default function ProtectedPage() {
 
       const responseData = await response.json();
       const botResponse = responseData.ai_msg;
-      const imageUrl = matchImageURL(botResponse);
 
       setIsTyping(false);
 
-      // Remove Markdown links and any URLs from the bot's response
-      const textPart = botResponse.replace(/\[.*?\]\(https?:\/\/[^\s]+?\)/g, '').trim();
+      // Check if the bot response contains a URL in the format [https://...]
+      const urlMatch = botResponse.match(/\[(https?:\/\/[^\s]+)\]/);
+      if (urlMatch && urlMatch[1]) {
+        const imageUrl = urlMatch[1];
 
-      if (imageUrl) {
+        // Display the bot's response message without the URL
+        const textPart = botResponse.replace(urlMatch[0], '').trim();
         addMessageToChat('bot', textPart);
-        addMessageToChat('image', imageUrl);
 
-        // Cache the image URL
-        imageCache.set(message, imageUrl);
+        // Display the image based on the extracted URL
+        addMessageToChat('image', imageUrl);
       } else {
+        // If no URL is present, display the full bot response as text
         addMessageToChat('bot', botResponse);
       }
     } catch (error) {
@@ -174,6 +178,7 @@ export default function ProtectedPage() {
       setIsTyping(false);
     }
   };
+
 
 
 

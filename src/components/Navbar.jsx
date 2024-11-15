@@ -1,29 +1,9 @@
-import React from 'react';
-import {
-  Box,
-  HStack,
-  IconButton,
-  Image,
-  useColorMode,
-  useColorModeValue,
-  Menu,
-  MenuButton,
-  MenuList,
-  MenuItem,
-  Button,
-  useDisclosure,
-  AlertDialog,
-  AlertDialogOverlay,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogBody,
-  AlertDialogFooter,
-  useBreakpointValue, // Import useBreakpointValue
-} from '@chakra-ui/react';
+import React, { useEffect } from 'react';
+import { Box, HStack, IconButton, Image, useColorMode, useColorModeValue, Menu, MenuButton, MenuList, MenuItem, Button, useDisclosure, AlertDialog, AlertDialogOverlay, AlertDialogContent, AlertDialogHeader, AlertDialogBody, AlertDialogFooter, useBreakpointValue } from '@chakra-ui/react';
 import { FaMoon, FaSun, FaUserCircle } from 'react-icons/fa';
 import Navlink from './Navlink';
 import logo from '../images/logo_navbar.png';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 export function Navbar() {
@@ -31,6 +11,7 @@ export function Navbar() {
   const { currentUser, logout } = useAuth();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const cancelRef = React.useRef();
+  const navigate = useNavigate(); // Hook to navigate programmatically
 
   // Responsive values
   const logoWidth = useBreakpointValue({ base: '80px', md: '100px' });
@@ -38,30 +19,25 @@ export function Navbar() {
   const spacing = useBreakpointValue({ base: 2, md: 4 });
   const buttonSize = useBreakpointValue({ base: 'sm', md: 'md' });
 
+  // Check if user is authenticated on page load (or refresh)
+  useEffect(() => {
+    if (!currentUser) {
+      navigate('/login'); // Redirect to login if no user is found
+    }
+  }, [currentUser, navigate]);
+
   const handleLogout = async () => {
     onClose();
     await logout();
+    navigate('/login'); // Redirect to login page after logout
   };
 
   return (
-    <Box
-      borderBottom="2px"
-      borderBottomColor={useColorModeValue('gray.100', 'gray.700')}
-      mb={4}
-      mx={{ base: 4, md: 8 }}
-    >
-      <HStack
-        py={4}
-        justifyContent="space-between"
-        alignItems="center"
-        maxW="container.lg"
-        mx="auto"
-        px={{ base: 4, md: 0 }}
-        spacing={spacing} // Adjust spacing based on screen size
-      >
+    <Box borderBottom="2px" borderBottomColor={useColorModeValue('gray.100', 'gray.700')} mb={4} mx={{ base: 4, md: 8 }}>
+      <HStack py={4} justifyContent="space-between" alignItems="center" maxW="container.lg" mx="auto" px={{ base: 4, md: 0 }} spacing={spacing}>
         {/* Logo with RouterLink */}
         <RouterLink to="/">
-          <Image w={logoWidth} src={logo} alt="Company Logo" /> {/* Responsive logo width */}
+          <Image w={logoWidth} src={logo} alt="Company Logo" />
         </RouterLink>
 
         {/* Navlinks and other components */}
@@ -71,13 +47,7 @@ export function Navbar() {
 
           {currentUser && (
             <Menu>
-              <MenuButton
-                as={IconButton}
-                icon={<FaUserCircle />}
-                aria-label="Profile Menu"
-                variant="outline"
-                size={iconSize} // Adjust icon size
-              />
+              <MenuButton as={IconButton} icon={<FaUserCircle />} aria-label="Profile Menu" variant="outline" size={iconSize} />
               <MenuList>
                 <Navlink to="/profile" name="Profile" />
                 <MenuItem onClick={onOpen}>Logout</MenuItem>
@@ -85,13 +55,7 @@ export function Navbar() {
             </Menu>
           )}
 
-          <IconButton
-            variant="outline"
-            icon={useColorModeValue(<FaSun />, <FaMoon />)}
-            onClick={toggleColorMode}
-            aria-label="toggle-dark-mode"
-            size={iconSize} // Adjust icon size
-          />
+          <IconButton variant="outline" icon={useColorModeValue(<FaSun />, <FaMoon />)} onClick={toggleColorMode} aria-label="toggle-dark-mode" size={iconSize} />
         </HStack>
       </HStack>
 

@@ -1,5 +1,7 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route} from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+
 import ForgotPasswordPage from '../pages/ForgotPasswordPage';
 import Homepage from '../pages/Homepage';
 import Loginpage from '../pages/Loginpage';
@@ -15,33 +17,41 @@ import OurStoryPage from '../pages/OurStory';
 import PrivacyPolicyPage from '../pages/PrivacyPolicy';
 import TermsConditionPage from '../pages/TermsCondition';
 
+export default function AppRouter() {
+  const { currentUser } = useAuth();
 
-export default function AppRouter(props) {
   return (
-    <>
-      <Router>
-        <Routes> 
-          <Route path='/' element={<Homepage />} />
-          <Route path='/login' element={<Loginpage />} />
-          <Route path='/register' element={<Registerpage />} />
-          
-          <Route element={<PrivateRoute/>}>
-              <Route path='/dashboard' element={<Dashboard />} exact/>
-              <Route path='/profile' element={<Profilepage />} />
-          </Route>
-          <Route path='/forgot-password' element={<ForgotPasswordPage />} />
-          <Route path='/reset-password' element={<ResetPasswordPage />} />
-          <Route path='*' element={<NotfoundPage />} />
+    <Router>
+      <Routes>
+        <Route path='/' element={<Homepage />} />
 
+        {/* Conditionally Render Login and Register Routes */}
+        <Route
+          path='/login'
+          element={currentUser ? <Navigate to='/dashboard' /> : <Loginpage />}
+        />
+        <Route
+          path='/register'
+          element={currentUser ? <Navigate to='/dashboard' /> : <Registerpage />}
+        />
 
-          <Route path='/meet-the-team' element={<MeetTheTeamPage />} />
-          <Route path='/about-us' element={<OurStoryPage />} />
-          <Route path='/privacy-policy' element={<PrivacyPolicyPage />} />
-          <Route path='/terms-and-conditions' element={<TermsConditionPage />} />
+        {/* Protected Routes */}
+        <Route element={<PrivateRoute />}>
+          <Route path='/dashboard' element={<Dashboard />} />
+          <Route path='/profile' element={<Profilepage />} />
+        </Route>
 
-        </Routes>
-      </Router>
-    </>
+        {/* Public Routes */}
+        <Route path='/forgot-password' element={<ForgotPasswordPage />} />
+        <Route path='/reset-password' element={<ResetPasswordPage />} />
+        <Route path='/meet-the-team' element={<MeetTheTeamPage />} />
+        <Route path='/about-us' element={<OurStoryPage />} />
+        <Route path='/privacy-policy' element={<PrivacyPolicyPage />} />
+        <Route path='/terms-and-conditions' element={<TermsConditionPage />} />
+
+        {/* Catch-all Route for 404 */}
+        <Route path='*' element={<NotfoundPage />} />
+      </Routes>
+    </Router>
   );
 }
-
