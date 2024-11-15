@@ -14,17 +14,16 @@ import {
 import { Layout } from '../components/Layout';
 import { AiOutlineDownload } from 'react-icons/ai';
 import { useBreakpointValue } from "@chakra-ui/react";
-import { useAuth } from '../contexts/AuthContext';
 
 export default function ProtectedPage() {
   const toast = useToast();
   const bgColor = useColorModeValue('gray.100', 'gray.700');
   const userBgColor = useColorModeValue('gray.200', 'gray.600');
   const buttonBgColor = useColorModeValue('blue.400', 'blue.300');
-  const buttonTextColor = useColorModeValue('white', 'gray.800'); 
-  const buttonHoverBgColor = useColorModeValue('blue.500', 'blue.400'); 
+  const buttonTextColor = useColorModeValue('white', 'gray.800');
+  const buttonHoverBgColor = useColorModeValue('blue.500', 'blue.400');
   const downloadbuttonBgColor = useColorModeValue('pink.600', 'pink.400');
-  const downloadbuttonTextColor = useColorModeValue('white', 'gray.800'); 
+  const downloadbuttonTextColor = useColorModeValue('white', 'gray.800');
   const downloadbuttonHoverBgColor = useColorModeValue('pink.700', 'pink.500');
 
   const buttonPadding = useBreakpointValue({ base: 2, md: 4 });
@@ -36,22 +35,20 @@ export default function ProtectedPage() {
   const [isTyping, setIsTyping] = useState(false);
   const [chatHistory, setChatHistory] = useState([{ role: 'bot', message: "Hi, How can I assist you?" },]);
   const [message, setMessage] = useState('');
-  const chatContainerRef = useRef(null); 
+  const chatContainerRef = useRef(null);
   const [downloadButtonText, setDownloadButtonText] = useState('Download');
   const [downloadButtonColor, setDownloadButtonColor] = useState(downloadbuttonBgColor);
-
-
 
 
   const scrollToBottom = () => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTo({
         top: chatContainerRef.current.scrollHeight,
-        behavior: 'smooth', 
+        behavior: 'smooth',
       });
     }
   };
- 
+
   useEffect(() => {
     const savedChatHistory = localStorage.getItem('chatHistory');
     if (savedChatHistory) {
@@ -64,14 +61,10 @@ export default function ProtectedPage() {
     scrollToBottom();
   }, [chatHistory]);
 
-  useEffect(() => {
-
-    handleNewChat();
-  }, []);
 
 
 
-   const addMessageToChat = (role, message) => {
+  const addMessageToChat = (role, message) => {
     setChatHistory((prevHistory) => {
       const updatedHistory = [...prevHistory, { role, message }];
       localStorage.setItem('chatHistory', JSON.stringify(updatedHistory));
@@ -80,35 +73,15 @@ export default function ProtectedPage() {
   };
 
 
-
-
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
-      sendMessage().then(r => {});
+      sendMessage().then(r => {
+      });
     }
   };
 
 
   //const urlRegex = /(https?:\/\/[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(\/[^\s]*)?)/g;
-  const matchImageURL = (message) => {
-    console.log("Incoming message:", message);
-    localStorage.setItem("lastMessage", message);
-
-    const markdownRegex = /\[(.*?)\]\((https?:\/\/[^\s]+)\)/;
-    const markdownMatch = message.match(markdownRegex);
-    if (markdownMatch) {
-
-      return markdownMatch[2];
-    }
-
-    const urlRegex = /(https?:\/\/[^\s,]+)/g;
-    const plainUrlMatch = message.match(urlRegex);
-    if (plainUrlMatch && plainUrlMatch.length > 0) {
-      return plainUrlMatch[0];
-    }
-    return null;
-  };
-
 
 
   const harmfulKeywords = [
@@ -116,15 +89,12 @@ export default function ProtectedPage() {
     'pornography', 'explicit', 'racism', 'sex', 'mutilation', 'illegal', 'self-harm',
     'terrorist', 'slaughter', 'rape', 'weapon', 'bomb', 'blood', 'bullying',
     'injury', 'death', 'gore', 'war', 'assault', 'torture', 'threat', 'firearm',
-    'explosion', 'explosive','pistol'
+    'explosion', 'explosive', 'pistol'
   ];
 
   const containsHarmfulContent = (input) => {
     return harmfulKeywords.some(keyword => input.toLowerCase().includes(keyword));
   };
-
-
-
 
 
 
@@ -153,23 +123,32 @@ export default function ProtectedPage() {
       });
 
       const responseData = await response.json();
-      const botResponse = responseData.ai_msg;
+      let botResponse = responseData.ai_msg;
 
       setIsTyping(false);
 
-      // Check if the bot response contains a URL in the format [https://...]
-      const urlMatch = botResponse.match(/\[(https?:\/\/[^\s]+)\]/);
-      if (urlMatch && urlMatch[1]) {
-        const imageUrl = urlMatch[1];
+      // Use matchImageURL to process the response and extract URL
+      const match = matchImageURL(botResponse);
 
-        // Display the bot's response message without the URL
-        const textPart = botResponse.replace(urlMatch[0], '').trim();
-        addMessageToChat('bot', textPart);
+      if (match) {
+        // Remove the URL from the bot's response
+        botResponse = botResponse.replace(match, '').trim();
 
-        // Display the image based on the extracted URL
-        addMessageToChat('image', imageUrl);
+        // Clean the response text (remove brackets and Markdown-like formatting)
+        botResponse = cleanText(botResponse);
+
+        // Display the cleaned text
+        if (botResponse) {
+          addMessageToChat('bot', botResponse);
+        }
+
+        // Display the extracted image URL
+        setIsLoading(true);
+        addMessageToChat('image', match);
+        setIsLoading(false);
       } else {
-        // If no URL is present, display the full bot response as text
+        // Clean the response text if no URL found
+        botResponse = cleanText(botResponse);
         addMessageToChat('bot', botResponse);
       }
     } catch (error) {
@@ -179,7 +158,36 @@ export default function ProtectedPage() {
     }
   };
 
+// Function to clean text
+  const cleanText = (text) => {
+    // Remove Markdown-style links and brackets
+    return text.replace(/\[(.*?)\]\((.*?)\)|[()\[\]]/g, '').trim();
+  };
 
+
+  const matchImageURL = (message) => {
+    console.log("Incoming message:", message);
+    localStorage.setItem("lastMessage", message);
+
+    // Match Markdown-style links [Text](URL)
+    const markdownRegex = /\[(.*?)\]\((https?:\/\/[^\s,)\]]+)\)/;
+    const markdownMatch = message.match(markdownRegex);
+    if (markdownMatch) {
+      console.log("Matched Markdown link:", markdownMatch[2]);
+      return markdownMatch[2]; // Return the extracted URL
+    }
+
+    // Match plain URLs
+    const urlRegex = /(https?:\/\/[^\s,)\]]+)/g;
+    const plainUrlMatch = message.match(urlRegex);
+    if (plainUrlMatch && plainUrlMatch.length > 0) {
+      console.log("Matched plain URL:", plainUrlMatch[0]);
+      return plainUrlMatch[0]; // Return the first matched URL
+    }
+
+    console.log("No URL found.");
+    return null;
+  };
 
 
 
