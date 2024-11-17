@@ -14,9 +14,13 @@ import {
 import { Layout } from '../components/Layout';
 import { AiOutlineDownload } from 'react-icons/ai';
 import { useBreakpointValue } from "@chakra-ui/react";
+import { useAuth } from '../contexts/AuthContext';
+import { uploadImage } from '../utils/init-firebase';
 
 export default function ProtectedPage() {
   const toast = useToast();
+  const { currentUser } = useAuth();
+
   const bgColor = useColorModeValue('gray.100', 'gray.700');
   const userBgColor = useColorModeValue('gray.200', 'gray.600');
   const buttonBgColor = useColorModeValue('blue.400', 'blue.300');
@@ -65,12 +69,28 @@ export default function ProtectedPage() {
 
 
   const addMessageToChat = (role, message) => {
+    const timestamp = Date.now(); // Current time in milliseconds
+    const newMessage = { role, message, timestamp };
+
     setChatHistory((prevHistory) => {
-      const updatedHistory = [...prevHistory, { role, message }];
+      const updatedHistory = [...prevHistory, newMessage];
       localStorage.setItem('chatHistory', JSON.stringify(updatedHistory));
       return updatedHistory;
     });
+
+    // Schedule deletion after 1 hour
+    setTimeout(() => {
+      setChatHistory((prevHistory) => {
+        const currentTime = Date.now();
+        const filteredHistory = prevHistory.filter(
+          (chat) => currentTime - chat.timestamp <= 60 * 60 * 1000
+        );
+        localStorage.setItem('chatHistory', JSON.stringify(filteredHistory));
+        return filteredHistory;
+      });
+    }, 60 * 60 * 1000);
   };
+
 
 
   const handleKeyPress = (e) => {
@@ -121,6 +141,7 @@ export default function ProtectedPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
+
 
       const responseData = await response.json();
       let botResponse = responseData.ai_msg;

@@ -19,12 +19,7 @@ export function Navbar() {
   const spacing = useBreakpointValue({ base: 2, md: 4 });
   const buttonSize = useBreakpointValue({ base: 'sm', md: 'md' });
 
-  // Check if user is authenticated on page load (or refresh)
-  useEffect(() => {
-    if (!currentUser) {
-      navigate('/login'); // Redirect to login if no user is found
-    }
-  }, [currentUser, navigate]);
+
 
   const handleLogout = async () => {
     onClose();
@@ -44,6 +39,9 @@ export function Navbar() {
         <HStack spacing={spacing}>
           {!currentUser && <Navlink to="/login" name="Login" />}
           {currentUser && <Navlink to="/dashboard" name="Dashboard" />}
+          {/*
+          {currentUser && <Navlink to={`/gallery/${currentUser.uid}`} name="Visual Haven" />}
+*/}
 
           {currentUser && (
             <Menu>

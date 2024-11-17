@@ -12,7 +12,7 @@ const firebaseConfig = {
     messagingSenderId: process.env.REACT_APP_MESSAGING_SENDER_ID,
     appId: process.env.REACT_APP_APP_ID,
     measurementId: "G-GEW56R95WG"
-    
+
 };
 
 // Initialize Firebase
@@ -37,5 +37,7 @@ export async function upload(file , currentUser, setLoading){
     alert("Uploaded File!")
 
 }
+
+
 
 
