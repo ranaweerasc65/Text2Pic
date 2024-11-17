@@ -10,12 +10,16 @@ import Profilepage from '../pages/Profilepage';
 import Dashboard from '../pages/Dashboard';
 import Registerpage from '../pages/Registerpage';
 import ResetPasswordPage from '../pages/ResetPasswordPage';
+import GalleryPage from '../pages/GalleryPage';
 
 import PrivateRoute from './PrivateRoute';
 import MeetTheTeamPage from '../pages/MeetTheTeam';
 import OurStoryPage from '../pages/OurStory';
 import PrivacyPolicyPage from '../pages/PrivacyPolicy';
 import TermsConditionPage from '../pages/TermsCondition';
+
+
+
 
 export default function AppRouter() {
   const { currentUser } = useAuth();
@@ -39,6 +43,7 @@ export default function AppRouter() {
         <Route element={<PrivateRoute />}>
           <Route path='/dashboard' element={<Dashboard />} />
           <Route path='/profile' element={<Profilepage />} />
+          <Route path='/gallery/:userId' element={<GalleryPage />} />
         </Route>
 
         {/* Public Routes */}
