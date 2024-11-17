@@ -39,9 +39,9 @@ export function Navbar() {
         <HStack spacing={spacing}>
           {!currentUser && <Navlink to="/login" name="Login" />}
           {currentUser && <Navlink to="/dashboard" name="Dashboard" />}
-          {/*
+
           {currentUser && <Navlink to={`/gallery/${currentUser.uid}`} name="Visual Haven" />}
-*/}
+
 
           {currentUser && (
             <Menu>
