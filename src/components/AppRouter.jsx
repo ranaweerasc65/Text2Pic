@@ -18,44 +18,32 @@ import OurStoryPage from '../pages/OurStory';
 import PrivacyPolicyPage from '../pages/PrivacyPolicy';
 import TermsConditionPage from '../pages/TermsCondition';
 
-
-
-
 export default function AppRouter() {
   const { currentUser } = useAuth();
 
   return (
     <Router>
       <Routes>
-        <Route path='/' element={<Homepage />} />
-
-        {/* Conditionally Render Login and Register Routes */}
-        <Route
-          path='/login'
-          element={currentUser ? <Navigate to='/dashboard' /> : <Loginpage />}
-        />
-        <Route
-          path='/register'
-          element={currentUser ? <Navigate to='/dashboard' /> : <Registerpage />}
-        />
+        {/* Public Routes */}
+        <Route path="/" element={<Homepage />} />
+        <Route path="/login" element={currentUser ? <Navigate to="/dashboard" /> : <Loginpage />} />
+        <Route path="/register" element={currentUser ? <Navigate to="/dashboard" /> : <Registerpage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/meet-the-team" element={<MeetTheTeamPage />} />
+        <Route path="/about-us" element={<OurStoryPage />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+        <Route path="/terms-and-conditions" element={<TermsConditionPage />} />
 
         {/* Protected Routes */}
         <Route element={<PrivateRoute />}>
-          <Route path='/dashboard' element={<Dashboard />} />
-          <Route path='/profile' element={<Profilepage />} />
-          <Route path='/gallery/:userId' element={<GalleryPage />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/profile" element={<Profilepage />} />
+          <Route path="/gallery/:userId" element={<GalleryPage />} />
         </Route>
 
-        {/* Public Routes */}
-        <Route path='/forgot-password' element={<ForgotPasswordPage />} />
-        <Route path='/reset-password' element={<ResetPasswordPage />} />
-        <Route path='/meet-the-team' element={<MeetTheTeamPage />} />
-        <Route path='/about-us' element={<OurStoryPage />} />
-        <Route path='/privacy-policy' element={<PrivacyPolicyPage />} />
-        <Route path='/terms-and-conditions' element={<TermsConditionPage />} />
-
         {/* Catch-all Route for 404 */}
-        <Route path='*' element={<NotfoundPage />} />
+        <Route path="*" element={<NotfoundPage />} />
       </Routes>
     </Router>
   );
