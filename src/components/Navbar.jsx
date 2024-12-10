@@ -43,6 +43,9 @@ export function Navbar() {
           {currentUser && <Navlink to={`/gallery/${currentUser.uid}`} name="Visual Haven" />}
           */}
 
+          {currentUser && <Navlink to={`/gallery/${currentUser.uid}`} name="Visual Haven" />}
+
+
           {currentUser && (
             <Menu>
               <MenuButton as={IconButton} icon={<FaUserCircle />} aria-label="Profile Menu" variant="outline" size={iconSize} />

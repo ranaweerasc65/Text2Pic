@@ -37,6 +37,9 @@ export default function AppRouter() {
 
         {/* Protected Routes */}
         <Route element={<PrivateRoute />}>
+          <Route path='/dashboard' element={<Dashboard />} />
+          <Route path='/profile' element={<Profilepage />} />
+          <Route path='/gallery/:userId' element={<GalleryPage />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/profile" element={<Profilepage />} />
           <Route path="/gallery/:userId" element={<GalleryPage />} />
