@@ -39,13 +39,7 @@ export function Navbar() {
         <HStack spacing={spacing}>
           {!currentUser && <Navlink to="/login" name="Login" />}
           {currentUser && <Navlink to="/dashboard" name="Dashboard" />}
-          {/*
           {currentUser && <Navlink to={`/gallery/${currentUser.uid}`} name="Visual Haven" />}
-          */}
-
-          {currentUser && <Navlink to={`/gallery/${currentUser.uid}`} name="Visual Haven" />}
-
-
           {currentUser && (
             <Menu>
               <MenuButton as={IconButton} icon={<FaUserCircle />} aria-label="Profile Menu" variant="outline" size={iconSize} />
