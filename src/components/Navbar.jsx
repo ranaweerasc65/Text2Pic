@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Box, HStack, IconButton, Image, useColorMode, useColorModeValue, Menu, MenuButton, MenuList, MenuItem, Button, useDisclosure, AlertDialog, AlertDialogOverlay, AlertDialogContent, AlertDialogHeader, AlertDialogBody, AlertDialogFooter, useBreakpointValue } from '@chakra-ui/react';
 import { FaMoon, FaSun, FaUserCircle } from 'react-icons/fa';
 import Navlink from './Navlink';
@@ -39,9 +39,9 @@ export function Navbar() {
         <HStack spacing={spacing}>
           {!currentUser && <Navlink to="/login" name="Login" />}
           {currentUser && <Navlink to="/dashboard" name="Dashboard" />}
-
+          {/*
           {currentUser && <Navlink to={`/gallery/${currentUser.uid}`} name="Visual Haven" />}
-
+          */}
 
           {currentUser && (
             <Menu>
